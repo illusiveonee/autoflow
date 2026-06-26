@@ -1,0 +1,839 @@
+admin<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoflow — Admin & Prospecting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2;
+  --surface:#FFFFFF;
+  --navy:#0F2744;
+  --navy-mid:#1A3A5C;
+  --navy-light:#E8EEF5;
+  --text:#1A1A1A;
+  --mid:#4A5568;
+  --faint:#94A3B8;
+  --line:#E2DDD6;
+  --danger:#DC2626;
+  --danger-light:#FEF2F2;
+  --success:#059669;
+  --success-light:#ECFDF5;
+  --warning:#D97706;
+  --warning-light:#FFFBEB;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;font-size:14.5px;}
+::selection{background:var(--navy);color:#fff;}
+a{color:inherit;text-decoration:none;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--line);padding:0 24px;}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:15px;height:15px;fill:#fff;}
+.logo-text{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;letter-spacing:.02em;}
+.back-link{font-size:13px;color:var(--mid);font-weight:500;}
+.back-link:hover{color:var(--navy);}
+
+/* TABS */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:32px;overflow-x:auto;}
+.tab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;}
+.tab:hover{color:var(--mid);}
+.tab.active{color:var(--navy);border-color:var(--navy);}
+
+/* PANELS */
+.panel{display:none;}
+.panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px;margin-bottom:20px;}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;}
+.card-sub{color:var(--mid);font-size:13.5px;margin-top:4px;max-width:60ch;line-height:1.6;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+/* FORM */
+.fg{margin-bottom:18px;}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;letter-spacing:.02em;}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);transition:border-color .15s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--navy);outline:none;}
+.fg textarea{resize:vertical;min-height:90px;}
+.fg small{display:block;margin-top:4px;font-size:11.5px;color:var(--faint);}
+
+/* BUTTONS */
+.btn{padding:11px 20px;border-radius:4px;font-weight:600;font-size:13.5px;cursor:pointer;border:2px solid var(--navy);transition:all .15s;display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{background:var(--navy-mid);}
+.btn-outline{background:transparent;color:var(--navy);}
+.btn-outline:hover{background:var(--navy);color:#fff;}
+.btn-sm{padding:7px 14px;font-size:12.5px;}
+.btn-danger{border-color:var(--danger);color:var(--danger);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-success{border-color:var(--success);color:var(--success);}
+.btn-success:hover{background:var(--success);color:#fff;}
+
+/* ALERTS */
+.alert{padding:14px 18px;border-radius:6px;font-size:13px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;}
+.alert-warn{background:var(--warning-light);color:var(--warning);border:1px solid #FCD34D;}
+.alert-danger{background:var(--danger-light);color:var(--danger);border:1px solid #FECACA;}
+.alert-info{background:var(--navy-light);color:var(--navy-mid);border:1px solid #CBD5E1;}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+@media(max-width:700px){.stat-grid{grid-template-columns:1fr 1fr;}}
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:22px 20px;}
+.stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:500;color:var(--navy);}
+.stat-label{font-size:12px;color:var(--faint);margin-top:4px;}
+
+/* PROMPT BOX */
+.prompt-box{background:#0F172A;border-radius:8px;padding:20px;color:#E2E8F0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;position:relative;overflow:hidden;}
+.prompt-box .copy-btn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);color:#fff;border:none;padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.prompt-box .copy-btn:hover{background:rgba(255,255,255,.2);}
+.prompt-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748B;margin-bottom:10px;}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:12px 16px;background:#FAFAF8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--line);white-space:nowrap;}
+td{padding:14px 16px;border-bottom:1px solid var(--line);color:var(--mid);vertical-align:top;}
+tr:hover td{background:#FAFAF8;}
+.status{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;}
+.status-pending{background:var(--warning-light);color:var(--warning);}
+.status-sent{background:var(--navy-light);color:var(--navy-mid);}
+.status-replied{background:var(--success-light);color:var(--success);}
+.status-booked{background:#E0E7FF;color:#3730A3;}
+
+/* COST CALC */
+.cost-bar{display:flex;align-items:center;gap:12px;margin:8px 0;}
+.cost-track{flex:1;height:28px;background:var(--bg);border-radius:4px;overflow:hidden;position:relative;border:1px solid var(--line);}
+.cost-fill{height:100%;background:var(--navy);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:11px;font-weight:600;transition:width .6s ease;}
+.cost-fill.human{background:#94A3B8;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,39,68,.35);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:10px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.modal-header{padding:24px 28px 0;border-bottom:0;}
+.modal-body{padding:20px 28px 28px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:22px;}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;background:var(--navy-light);color:var(--navy-mid);margin-right:4px;margin-bottom:4px;}
+
+/* UTILS */
+.hidden{display:none !important;}
+.mt-2{margin-top:8px;}
+.mt-3{margin-top:12px;}
+.flex{display:flex;gap:10px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2a10 10 0 1 0 10 10" stroke="#fff" stroke-width="2" fill="none"/></svg>
+      </div>
+      <div class="logo-text">Autoflow <span style="font-size:13px;color:var(--faint);font-family:'DM Sans',sans-serif;font-weight:400">— Admin</span></div>
+    </div>
+    <a href="index.html" class="back-link">← Back to site</a>
+  </div>
+</nav>
+
+<div class="wrap" style="padding-top:32px;padding-bottom:60px;">
+
+  <!-- STATS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="statProspects">0</div>
+      <div class="stat-label">Prospects found</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statEmailed">0</div>
+      <div class="stat-label">Emails sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statReplies">0</div>
+      <div class="stat-label">Replies</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statBooked">0</div>
+      <div class="stat-label">Meetings booked</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('prospect')">Prospect Finder</div>
+    <div class="tab" onclick="switchTab('email')">Email Forge</div>
+    <div class="tab" onclick="switchTab('campaigns')">Campaigns</div>
+    <div class="tab" onclick="switchTab('settings')">Settings & API</div>
+  </div>
+
+  <!-- PANEL: PROSPECT FINDER -->
+  <div class="panel active" id="panel-prospect">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Find Targets</div>
+            <div class="card-sub">Pick a vertical and city. We’ll build the exact Claude prompt to find businesses that need a receptionist.</div>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Industry / Vertical</label>
+          <select id="pfIndustry">
+            <option value="law">Law Firms</option>
+            <option value="dental">Dental Offices</option>
+            <option value="medical">Medical Practices</option>
+            <option value="hvac">HVAC / Plumbing</option>
+            <option value="auto">Auto Dealerships</option>
+            <option value="re">Real Estate Agencies</option>
+            <option value="accounting">Accounting Firms</option>
+            <option value="insurance">Insurance Agencies</option>
+            <option value="vet">Veterinary Clinics</option>
+            <option value="chiro">Chiropractors</option>
+            <option value="spa">Spas & MedSpas</option>
+            <option value="hotel">Hotels & Motels</option>
+            <option value="general">General Small Business</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>City + State</label>
+          <input type="text" id="pfCity" placeholder="e.g. Houston TX" value="Houston TX">
+        </div>
+        <div class="fg">
+          <label>Pain Signal (optional)</label>
+          <select id="pfPain">
+            <option value="missed">Missed calls / No answer</option>
+            <option value="reviews">Bad reviews mentioning front desk</option>
+            <option value="hours">No after-hours answering</option>
+            <option value="growth">Growing fast, need coverage</option>
+            <option value="cost">High staffing costs</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Number of prospects to find</label>
+          <select id="pfCount">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="generateProspectPrompt()">Generate Claude Prompt</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Cost Comparison</div>
+            <div class="card-sub">The pitch numbers Claude will use in every email.</div>
+          </div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;">
+            <span>3 Human Receptionists</span>
+            <span class="mono">~$9,600/mo</span>
+          </div>
+          <div class="cost-bar">
+            <div class="cost-track"><div class="cost-fill human" style="width:100%">$9.6K</div></div>
+          </div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;">
+            <span>5 Human Receptionists</span>
+            <span class="mono">~$16,000/mo</span>
+          </div>
+          <div class="cost-bar">
+            <div class="cost-track"><div class="cost-fill human" style="width:100%">$16K</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--navy);margin-bottom:6px;">
+            <span>Autoflow AI Receptionist</span>
+            <span class="mono">$599/mo</span>
+          </div>
+          <div class="cost-bar">
+            <div class="cost-track"><div class="cost-fill" style="width:6%">$599</div></div>
+          </div>
+        </div>
+        <div class="alert alert-info mt-3">
+          <div>
+            <strong>Savings:</strong> Replacing 3 staff saves ~$8,900/mo. Replacing 5 saves ~$15,400/mo. The AI never calls in sick, works 24/7, and speaks Spanish.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="prospectPromptCard">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Claude Prompt — Copy & Paste</div>
+          <div class="card-sub">Open Claude.ai (or your API console), paste this, and paste the JSON results back below.</div>
+        </div>
+      </div>
+      <div class="prompt-box">
+        <div class="prompt-label">System Prompt</div>
+        <div id="prospectPromptText" style="white-space:pre-wrap;word-break:break-word;"></div>
+        <button class="copy-btn" onclick="copyPrompt('prospectPromptText')">Copy</button>
+      </div>
+      <div class="fg mt-3">
+        <label>Paste Claude’s JSON output here</label>
+        <textarea id="prospectResult" rows="6" placeholder='[{"name":"Smith & Associates","type":"Law Firm","phone":"(713) 555-0192","why":"No after-hours answering","angle":"3 paralegals currently splitting front-desk duty"}, ...]'></textarea>
+        <small>Paste the exact JSON array Claude returns. The table below will auto-populate.</small>
+      </div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="parseProspects()">Load into Campaigns</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('prospectPromptCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: EMAIL FORGE -->
+  <div class="panel" id="panel-email">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Draft the Pitch</div>
+            <div class="card-sub">Select a prospect from your campaign list and Claude will write a personalized cold email.</div>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Select Prospect</label>
+          <select id="efProspect"><option value="">— Choose from campaigns —</option></select>
+        </div>
+        <div class="fg">
+          <label>Or enter manually</label>
+          <input type="text" id="efName" placeholder="Business name">
+        </div>
+        <div class="fg">
+          <input type="text" id="efType" placeholder="Type (e.g. Dental Office)">
+        </div>
+        <div class="fg">
+          <textarea id="efAngle" rows="3" placeholder="Why they need this? (e.g. 'Front desk only open 9-5, patients complain about missed calls after hours')"></textarea>
+        </div>
+        <div class="fg">
+          <label>Tone</label>
+          <select id="efTone">
+            <option value="direct">Direct — cut to the savings</option>
+            <option value="consultative" selected>Consultative — diagnose the pain first</option>
+            <option value="urgent">Urgent — limited spots in their city</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="generateEmailPrompt()">Generate Email Prompt</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Email Templates</div>
+            <div class="card-sub">Quick copy-paste starters you can customize.</div>
+          </div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:8px;">Template A — The Cost Shock</div>
+          <div style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px;font-size:13px;color:var(--mid);line-height:1.65;">
+            Subject: Cutting $9,000/mo from your front desk<br><br>
+            Hi [Name],<br><br>
+            Most [industry] offices in [city] spend $9,000–$16,000/month on 3–5 front-desk staff before benefits, taxes, and turnover. Autoflow replaces that with a 24/7 AI receptionist for $599 flat.<br><br>
+            It answers every call in under 2 rings, books appointments straight into your calendar, and speaks English and Spanish. No missed calls. No sick days. No training.<br><br>
+            Worth a 10-minute conversation this week?<br><br>
+            Best,<br>
+            [Your name]
+          </div>
+          <button class="btn btn-sm btn-outline mt-2" onclick="copyTemplate(this)">Copy</button>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:8px;">Template B — The Pain Mirror</div>
+          <div style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px;font-size:13px;color:var(--mid);line-height:1.65;">
+            Subject: After-hours calls going to voicemail?<br><br>
+            Hi [Name],<br><br>
+            I noticed [specific pain signal]. That usually means revenue is walking to the competitor who answers the phone at 7 PM.<br><br>
+            We built Autoflow specifically for [industry] practices in [city] — an AI receptionist that handles booking, FAQs, and lead capture around the clock for less than one day’s pay of a human receptionist.<br><br>
+            Can I send you a 2-minute demo video?<br><br>
+            Best,<br>
+            [Your name]
+          </div>
+          <button class="btn btn-sm btn-outline mt-2" onclick="copyTemplate(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="emailPromptCard">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Claude Email Prompt</div>
+          <div class="card-sub">Paste this into Claude. It will return a subject line + body you can paste into Gmail/Outlook.</div>
+        </div>
+      </div>
+      <div class="prompt-box">
+        <div class="prompt-label">Email Prompt</div>
+        <div id="emailPromptText" style="white-space:pre-wrap;word-break:break-word;"></div>
+        <button class="copy-btn" onclick="copyPrompt('emailPromptText')">Copy</button>
+      </div>
+      <div class="fg mt-3">
+        <label>Paste Claude’s email output here (optional)</label>
+        <textarea id="emailResult" rows="6" placeholder="Paste subject + body here to save to this prospect's record..."></textarea>
+      </div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="saveEmailToProspect()">Save to Prospect Record</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('emailPromptCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: CAMPAIGNS -->
+  <div class="panel" id="panel-campaigns">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Campaign Tracker</div>
+          <div class="card-sub">All your prospects, emails, and follow-ups in one place. Stored locally on this device.</div>
+        </div>
+        <div class="flex">
+          <button class="btn btn-sm btn-outline" onclick="exportCSV()">Export CSV</button>
+          <button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Type</th>
+              <th>City</th>
+              <th>Angle / Pain</th>
+              <th>Status</th>
+              <th>Email Sent</th>
+              <th>Notes</th>
+              <th style="width:90px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="campaignTable"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" style="text-align:center;padding:40px;color:var(--faint);font-size:13px;">
+        No prospects yet. Use the <strong>Prospect Finder</strong> to generate targets, then load them here.
+      </div>
+    </div>
+
+    <!-- Add manual prospect -->
+    <div class="card">
+      <div class="card-title" style="font-size:18px;margin-bottom:16px;">Add Prospect Manually</div>
+      <div class="grid-3">
+        <div class="fg">
+          <label>Business Name</label>
+          <input type="text" id="manName" placeholder="e.g. River Oaks Dental">
+        </div>
+        <div class="fg">
+          <label>Type</label>
+          <input type="text" id="manType" placeholder="e.g. Dental Office">
+        </div>
+        <div class="fg">
+          <label>City</label>
+          <input type="text" id="manCity" placeholder="e.g. Houston TX">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Pain / Angle</label>
+        <input type="text" id="manAngle" placeholder="e.g. No weekend answering, losing implant consults">
+      </div>
+      <button class="btn btn-primary" onclick="addManual()">Add to Campaign</button>
+    </div>
+  </div>
+
+  <!-- PANEL: SETTINGS -->
+  <div class="panel" id="panel-settings">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">API Key</div>
+            <div class="card-sub">Stored in your browser only. Never sent to our servers.</div>
+          </div>
+        </div>
+        <div class="alert alert-warn">
+          <div>⚠️ Anthropic’s API blocks browser requests (CORS). The prompts in this dashboard are designed to be copied into Claude.ai or a secure script. Do not expose this key in public repos.</div>
+        </div>
+        <div class="fg">
+          <label>Anthropic API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-ant-api03-...">
+          <small>Used only to generate prompt boxes. Not required if you paste prompts manually into Claude.ai.</small>
+        </div>
+        <div class="fg">
+          <label>Your Name (for email sign-offs)</label>
+          <input type="text" id="userName" placeholder="e.g. Jordan">
+        </div>
+        <div class="fg">
+          <label>Your Email</label>
+          <input type="email" id="userEmail" placeholder="you@autoflow.icu">
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        <div id="settingsSaved" style="margin-top:10px;font-size:13px;color:var(--success);display:none;">✓ Saved to local storage</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">How This Works</div>
+            <div class="card-sub">3-step workflow designed for iPhone + Vercel static hosting.</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div style="display:flex;gap:14px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">1</div>
+            <div>
+              <div style="font-weight:600;font-size:14px;">Generate Prompt</div>
+              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Pick a city and industry. The dashboard builds a Claude prompt that finds real businesses and their pain points.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">2</div>
+            <div>
+              <div style="font-weight:600;font-size:14px;">Run in Claude</div>
+              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Copy the prompt, open Claude.ai, paste it, and copy the JSON results back into the dashboard.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">3</div>
+            <div>
+              <div style="font-weight:600;font-size:14px;">Email & Track</div>
+              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Use the Email Forge to draft personalized pitches. Track everything in the Campaigns tab. Export to CSV when you need a spreadsheet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Update Prospect</div>
+      <div class="card-sub">Change status, add notes, or paste the email you sent.</div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="fg">
+        <label>Status</label>
+        <select id="editStatus">
+          <option value="pending">Pending</option>
+          <option value="sent">Email Sent</option>
+          <option value="replied">Replied</option>
+          <option value="booked">Meeting Booked</option>
+          <option value="closed">Closed / Lost</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Email Body Sent</label>
+        <textarea id="editEmail" rows="4" placeholder="Paste the exact email you sent..."></textarea>
+      </div>
+      <div class="fg">
+        <label>Notes / Follow-up</label>
+        <textarea id="editNotes" rows="3" placeholder="e.g. Called back at 3pm, wants demo on Tuesday"></textarea>
+      </div>
+      <div class="flex">
+        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* STATE */
+var campaigns = JSON.parse(localStorage.getItem('af_campaigns') || '[]');
+var settings = JSON.parse(localStorage.getItem('af_settings') || '{}');
+
+/* INIT */
+document.addEventListener('DOMContentLoaded', function(){
+  if(settings.apiKey) document.getElementById('apiKey').value = settings.apiKey;
+  if(settings.userName) document.getElementById('userName').value = settings.userName;
+  if(settings.userEmail) document.getElementById('userEmail').value = settings.userEmail;
+  renderCampaigns();
+  updateStats();
+  populateEmailSelect();
+});
+
+/* TABS */
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='campaigns'){renderCampaigns();updateStats();}
+  if(id==='email')populateEmailSelect();
+}
+
+/* SETTINGS */
+function saveSettings(){
+  settings.apiKey = document.getElementById('apiKey').value.trim();
+  settings.userName = document.getElementById('userName').value.trim();
+  settings.userEmail = document.getElementById('userEmail').value.trim();
+  localStorage.setItem('af_settings', JSON.stringify(settings));
+  var el = document.getElementById('settingsSaved');
+  el.style.display='block';
+  setTimeout(function(){el.style.display='none';}, 2000);
+}
+
+/* PROSPECT PROMPT GENERATOR */
+function generateProspectPrompt(){
+  var industry = document.getElementById('pfIndustry').value;
+  var city = document.getElementById('pfCity').value.trim() || 'Houston TX';
+  var pain = document.getElementById('pfPain').value;
+  var count = document.getElementById('pfCount').value;
+  var name = settings.userName || '[Your name]';
+
+  var verticals = {
+    law:'law firms', dental:'dental offices', medical:'medical practices', hvac:'HVAC and plumbing companies',
+    auto:'auto dealerships', re:'real estate agencies', accounting:'accounting firms', insurance:'insurance agencies',
+    vet:'veterinary clinics', chiro:'chiropractors', spa:'spas and medspas', hotel:'hotels and motels', general:'small businesses'
+  };
+  var pains = {
+    missed:'no one answers the phone after hours or during lunch — callers go straight to voicemail',
+    reviews:'recent 1-2 star reviews specifically complain about rude front desk or long hold times',
+    hours:'the business closes at 5 PM but customers call at 6-8 PM and no one is there',
+    growth:'they are hiring multiple front-desk staff but still missing calls during busy periods',
+    cost:'they currently employ 3-5 receptionists and the owner has mentioned staffing costs publicly'
+  };
+
+  var prompt = `You are a lead researcher for Autoflow, an AI receptionist company.\n\n` +
+    `Find ${count} real ${verticals[industry]} in ${city} that likely need a 24/7 AI receptionist.\n\n` +
+    `Focus on businesses showing this pain signal: ${pains[pain]}.\n\n` +
+    `For each business, provide:\n` +
+    `- name (real business name)\n` +
+    `- type (specific subtype)\n` +
+    `- phone (formatted)\n` +
+    `- why (one sentence on why they need Autoflow)\n` +
+    `- angle (specific operational detail you found that makes them a good fit)\n\n` +
+    `Return ONLY a valid JSON array. No markdown, no explanation. Example:\n` +
+    `[{"name":"River Oaks Dental","type":"Cosmetic Dental","phone":"(713) 555-0192","why":"No weekend answering; loses implant consults","angle":"Single front-desk employee, closes at 4pm Fridays"}]\n\n` +
+    `Make every entry realistic and specific to ${city}.`;
+
+  document.getElementById('prospectPromptText').textContent = prompt;
+  document.getElementById('prospectPromptCard').classList.remove('hidden');
+  document.getElementById('prospectPromptCard').scrollIntoView({behavior:'smooth'});
+}
+
+/* EMAIL PROMPT GENERATOR */
+function generateEmailPrompt(){
+  var sel = document.getElementById('efProspect').value;
+  var name = document.getElementById('efName').value.trim();
+  var type = document.getElementById('efType').value.trim();
+  var angle = document.getElementById('efAngle').value.trim();
+  var tone = document.getElementById('efTone').value;
+  var myName = settings.userName || '[Your name]';
+
+  if(sel){
+    var p = campaigns.find(function(c){return c.id===sel;});
+    if(p){name=p.name;type=p.type;angle=p.angle;}
+  }
+  if(!name){alert('Enter a business name or select a prospect.');return;}
+
+  var toneInstructions = {
+    direct:'Be direct. Lead with the cost comparison in the first sentence. No fluff.',
+    consultative:'Be consultative. Ask a diagnostic question first. Then show the cost comparison as the solution.',
+    urgent:'Create mild urgency. Mention we are onboarding a limited number of practices in their city this month.'
+  };
+
+  var prompt = `Write a cold email to ${name}, a ${type}.\n\n` +
+    `Context: ${angle}\n\n` +
+    `Product: Autoflow — AI receptionist that answers calls 24/7, books appointments, handles FAQs, and speaks English and Spanish. $599/month flat.\n\n` +
+    `Key comparison to weave in: hiring 3 human receptionists costs ~$9,600/month (plus benefits, taxes, turnover). Hiring 5 costs ~$16,000/month. Autoflow is $599.\n\n` +
+    `Tone instruction: ${toneInstructions[tone]}\n\n` +
+    `Requirements:\n` +
+    `- Subject line under 8 words\n` +
+    `- First sentence must reference their specific pain\n` +
+    `- Include the 3-receptionist vs $599 comparison explicitly\n` +
+    `- End with one low-friction CTA (reply, 10-min call, or demo video)\n` +
+    `- Sign off as "${myName}" from Autoflow\n` +
+    `- Total length: 120-160 words\n\n` +
+    `Return ONLY the subject line and body text. No JSON, no markdown headers.`;
+
+  document.getElementById('emailPromptText').textContent = prompt;
+  document.getElementById('emailPromptCard').classList.remove('hidden');
+  document.getElementById('emailPromptCard').scrollIntoView({behavior:'smooth'});
+}
+
+/* PARSE PROSPECTS */
+function parseProspects(){
+  var raw = document.getElementById('prospectResult').value.trim();
+  if(!raw){alert('Paste Claude\'s JSON first.');return;}
+  try{
+    var arr = JSON.parse(raw);
+    if(!Array.isArray(arr)){alert('Expected a JSON array.');return;}
+    var city = document.getElementById('pfCity').value.trim() || 'Houston TX';
+    var added = 0;
+    arr.forEach(function(item){
+      campaigns.push({
+        id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+        name: item.name || 'Unknown',
+        type: item.type || 'Business',
+        city: city,
+        angle: item.why || item.angle || '',
+        status: 'pending',
+        emailSent: '',
+        notes: '',
+        created: new Date().toISOString()
+      });
+      added++;
+    });
+    saveCampaigns();
+    renderCampaigns();
+    updateStats();
+    populateEmailSelect();
+    alert('Added ' + added + ' prospects to Campaigns.');
+    document.getElementById('prospectResult').value='';
+  }catch(e){alert('Invalid JSON. Make sure you copied the array exactly.\nError: '+e.message);}
+}
+
+/* MANUAL ADD */
+function addManual(){
+  var name = document.getElementById('manName').value.trim();
+  var type = document.getElementById('manType').value.trim();
+  var city = document.getElementById('manCity').value.trim();
+  var angle = document.getElementById('manAngle').value.trim();
+  if(!name){alert('Business name required.');return;}
+  campaigns.push({
+    id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+    name:name, type:type||'Business', city:city||'Unknown', angle:angle,
+    status:'pending', emailSent:'', notes:'', created:new Date().toISOString()
+  });
+  saveCampaigns();
+  renderCampaigns();
+  updateStats();
+  populateEmailSelect();
+  document.getElementById('manName').value='';
+  document.getElementById('manType').value='';
+  document.getElementById('manCity').value='';
+  document.getElementById('manAngle').value='';
+}
+
+/* RENDER TABLE */
+function renderCampaigns(){
+  var tbody = document.getElementById('campaignTable');
+  var empty = document.getElementById('emptyState');
+  if(campaigns.length===0){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML = campaigns.map(function(c){
+    var statusClass = 'status-' + c.status;
+    var statusText = {pending:'Pending',sent:'Sent',replied:'Replied',booked:'Booked',closed:'Closed'}[c.status] || c.status;
+    var emailPreview = c.emailSent ? (c.emailSent.substring(0,60)+'...') : '—';
+    return `<tr>
+      <td><strong style="color:var(--text);">${esc(c.name)}</strong></td>
+      <td>${esc(c.type)}</td>
+      <td>${esc(c.city)}</td>
+      <td style="max-width:220px;font-size:12.5px;">${esc(c.angle)}</td>
+      <td><span class="status ${statusClass}">${statusText}</span></td>
+      <td style="max-width:180px;font-size:12px;color:var(--faint);">${esc(emailPreview)}</td>
+      <td style="max-width:180px;font-size:12px;color:var(--faint);">${esc(c.notes)}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="openEdit('${c.id}')">Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s){return (s||'').replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+
+function saveCampaigns(){localStorage.setItem('af_campaigns', JSON.stringify(campaigns));}
+
+function updateStats(){
+  document.getElementById('statProspects').textContent = campaigns.length;
+  document.getElementById('statEmailed').textContent = campaigns.filter(function(c){return c.status==='sent'||c.status==='replied'||c.status==='booked';}).length;
+  document.getElementById('statReplies').textContent = campaigns.filter(function(c){return c.status==='replied'||c.status==='booked';}).length;
+  document.getElementById('statBooked').textContent = campaigns.filter(function(c){return c.status==='booked';}).length;
+}
+
+/* EMAIL SELECT POPULATE */
+function populateEmailSelect(){
+  var sel = document.getElementById('efProspect');
+  sel.innerHTML = '<option value="">— Choose from campaigns —</option>' +
+    campaigns.map(function(c){return `<option value="${c.id}">${esc(c.name)} (${c.type})</option>`;}).join('');
+}
+
+/* EDIT MODAL */
+function openEdit(id){
+  var c = campaigns.find(function(x){return x.id===id;});
+  if(!c)return;
+  document.getElementById('editId').value = id;
+  document.getElementById('editStatus').value = c.status;
+  document.getElementById('editEmail').value = c.emailSent;
+  document.getElementById('editNotes').value = c.notes;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeModal(){document.getElementById('editModal').classList.remove('open');}
+function saveEdit(){
+  var id = document.getElementById('editId').value;
+  var c = campaigns.find(function(x){return x.id===id;});
+  if(c){
+    c.status = document.getElementById('editStatus').value;
+    c.emailSent = document.getElementById('editEmail').value;
+    c.notes = document.getElementById('editNotes').value;
+    saveCampaigns();
+    renderCampaigns();
+    updateStats();
+    closeModal();
+  }
+}
+
+/* SAVE EMAIL FROM FORGE */
+function saveEmailToProspect(){
+  var sel = document.getElementById('efProspect').value;
+  var body = document.getElementById('emailResult').value.trim();
+  if(!body){alert('Paste the email output first.');return;}
+  if(!sel){alert('Select a prospect from the dropdown first.');return;}
+  var c = campaigns.find(function(x){return x.id===sel;});
+  if(c){c.emailSent=body;c.status='sent';saveCampaigns();renderCampaigns();updateStats();alert('Saved to '+c.name);}
+}
+
+/* UTILS */
+function copyPrompt(id){
+  var text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(function(){alert('Copied to clipboard. Open Claude.ai and paste.');});
+}
+function copyTemplate(btn){
+  var text = btn.previousElementSibling.textContent;
+  navigator.clipboard.writeText(text).then(function(){btn.textContent='Copied';setTimeout(function(){btn.textContent='Copy';},1500);});
+}
+function exportCSV(){
+  if(campaigns.length===0){alert('No data to export.');return;}
+  var headers = ['Name','Type','City','Angle','Status','EmailSent','Notes','Created'];
+  var rows = campaigns.map(function(c){return [c.name,c.type,c.city,c.angle,c.status,(c.emailSent||'').replace(/\n/g,' '),(c.notes||'').replace(/\n/g,' '),c.created];});
+  var csv = [headers].concat(rows).map(function(r){return r.map(function(f){return '"'+String(f).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob = new Blob([csv],{type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'autoflow-campaigns-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+function clearAll(){
+  if(confirm('Delete ALL prospects? This cannot be undone.')){
+    campaigns=[];saveCampaigns();renderCampaigns();updateStats();populateEmailSelect();
+  }
+}
+</script>
+</body>
+</html>'''
+
+with open('/mnt/agents/output/admin.html', 'w') as f:
+    f.write(admin_html)
+
+print("admin.html created successfully")
+print(f"File size: {len(admin_html)} characters")
