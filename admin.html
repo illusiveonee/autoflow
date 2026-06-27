@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Autoflow — Admin & Prospecting</title>
+<title>Autoflow — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#F7F6F2;
@@ -24,6 +25,8 @@
   --success-light:#ECFDF5;
   --warning:#D97706;
   --warning-light:#FFFBEB;
+  --purple:#7C3AED;
+  --purple-light:#EDE9FE;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -42,92 +45,107 @@ nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px sol
 .back-link{font-size:13px;color:var(--mid);font-weight:500;}
 .back-link:hover{color:var(--navy);}
 
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:32px;overflow-x:auto;}
-.tab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;}
-.tab:hover{color:var(--mid);}
-.tab.active{color:var(--navy);border-color:var(--navy);}
+.section{padding:40px 0;border-top:1px solid var(--line);}
+.section:first-of-type{border-top:none;padding-top:32px;}
+.sec-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;margin-bottom:6px;}
+.sec-sub{color:var(--mid);font-size:14px;margin-bottom:24px;}
 
-.panel{display:none;}
-.panel.active{display:block;animation:fade .25s ease;}
-@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+@media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr;}}
+.stat-box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px 20px;position:relative;overflow:hidden;}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--navy);}
+.stat-box.revenue::before{background:var(--success);}
+.stat-box.prospects::before{background:var(--warning);}
+.stat-box.emails::before{background:var(--purple);}
+.stat-num{font-family:'Playfair Display',serif;font-size:36px;font-weight:500;color:var(--navy);}
+.stat-label{font-size:12.5px;color:var(--faint);margin-top:4px;letter-spacing:.02em;}
+.stat-change{font-size:11px;color:var(--success);margin-top:6px;font-weight:600;}
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px;margin-bottom:20px;}
-.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
-.card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;}
-.card-sub{color:var(--mid);font-size:13.5px;margin-top:4px;max-width:60ch;line-height:1.6;}
+.chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:32px;}
+@media(max-width:860px){.chart-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.chart-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.chart-sub{font-size:12px;color:var(--faint);}
+.chart-wrap{position:relative;height:280px;}
+.chart-wrap.pie{height:240px;}
 
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-@media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+.mini-list{display:flex;flex-direction:column;gap:10px;}
+.mini-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--line);}
+.mini-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.mini-info{flex:1;min-width:0;}
+.mini-name{font-size:13.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mini-meta{font-size:11.5px;color:var(--faint);margin-top:1px;}
+.mini-amount{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--navy);}
 
-.fg{margin-bottom:18px;}
-.fg label{display:block;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;letter-spacing:.02em;}
-.fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);transition:border-color .15s;}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--navy);outline:none;}
-.fg textarea{resize:vertical;min-height:90px;}
-.fg small{display:block;margin-top:4px;font-size:11.5px;color:var(--faint);}
-
-.btn{padding:11px 20px;border-radius:4px;font-weight:600;font-size:13.5px;cursor:pointer;border:2px solid var(--navy);transition:all .15s;display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;}
-.btn-primary{background:var(--navy);color:#fff;}
-.btn-primary:hover{background:var(--navy-mid);}
-.btn-outline{background:transparent;color:var(--navy);}
-.btn-outline:hover{background:var(--navy);color:#fff;}
-.btn-sm{padding:7px 14px;font-size:12.5px;}
-.btn-danger{border-color:var(--danger);color:var(--danger);}
-.btn-danger:hover{background:var(--danger);color:#fff;}
-.btn-success{border-color:var(--success);color:var(--success);}
-.btn-success:hover{background:var(--success);color:#fff;}
-
-.alert{padding:14px 18px;border-radius:6px;font-size:13px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;}
-.alert-warn{background:var(--warning-light);color:var(--warning);border:1px solid #FCD34D;}
-.alert-danger{background:var(--danger-light);color:var(--danger);border:1px solid #FECACA;}
-.alert-info{background:var(--navy-light);color:var(--navy-mid);border:1px solid #CBD5E1;}
-
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
-@media(max-width:700px){.stat-grid{grid-template-columns:1fr 1fr;}}
-.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:22px 20px;}
-.stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:500;color:var(--navy);}
-.stat-label{font-size:12px;color:var(--faint);margin-top:4px;}
-
-.prompt-box{background:#0F172A;border-radius:8px;padding:20px;color:#E2E8F0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;position:relative;overflow:hidden;}
-.prompt-box .copy-btn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);color:#fff;border:none;padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.prompt-box .copy-btn:hover{background:rgba(255,255,255,.2);}
-.prompt-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748B;margin-bottom:10px;}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:860px){.card-grid{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.card-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;}
+.card-actions{display:flex;gap:8px;}
 
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{text-align:left;padding:12px 16px;background:#FAFAF8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--line);white-space:nowrap;}
 td{padding:14px 16px;border-bottom:1px solid var(--line);color:var(--mid);vertical-align:top;}
 tr:hover td{background:#FAFAF8;}
+tr:last-child td{border-bottom:none;}
 .status{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;}
+.status-active{background:var(--success-light);color:var(--success);}
+.status-paused{background:var(--warning-light);color:var(--warning);}
+.status-cancelled{background:var(--danger-light);color:var(--danger);}
 .status-pending{background:var(--warning-light);color:var(--warning);}
 .status-sent{background:var(--navy-light);color:var(--navy-mid);}
 .status-replied{background:var(--success-light);color:var(--success);}
 .status-booked{background:#E0E7FF;color:#3730A3;}
-.status-active{background:var(--success-light);color:var(--success);}
-.status-paused{background:var(--warning-light);color:var(--warning);}
-.status-cancelled{background:var(--danger-light);color:var(--danger);}
+
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;letter-spacing:.02em;}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);transition:border-color .15s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--navy);outline:none;}
+.fg textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+
+.btn{padding:10px 18px;border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;border:2px solid var(--navy);transition:all .15s;display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{background:var(--navy-mid);}
+.btn-outline{background:transparent;color:var(--navy);}
+.btn-outline:hover{background:var(--navy);color:#fff;}
+.btn-sm{padding:7px 14px;font-size:12px;}
+.btn-danger{border-color:var(--danger);color:var(--danger);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-success{border-color:var(--success);color:var(--success);}
+.btn-success:hover{background:var(--success);color:#fff;}
+
+.alert{padding:12px 16px;border-radius:6px;font-size:13px;margin-bottom:16px;}
+.alert-info{background:var(--navy-light);color:var(--navy-mid);border:1px solid #CBD5E1;}
+.alert-success{background:var(--success-light);color:var(--success);border:1px solid #A7F3D0;}
+.alert-warn{background:var(--warning-light);color:var(--warning);border:1px solid #FCD34D;}
+.alert-danger{background:var(--danger-light);color:var(--danger);border:1px solid #FECACA;}
+
+.empty{text-align:center;padding:48px 20px;color:var(--faint);font-size:13px;}
+.empty-icon{font-size:32px;margin-bottom:12px;opacity:.5;}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(15,39,68,.35);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border-radius:10px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.15);}
-.modal-header{padding:24px 28px 0;border-bottom:0;}
+.modal{background:var(--surface);border-radius:10px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.modal-header{padding:24px 28px 0;}
 .modal-body{padding:20px 28px 28px;}
 .modal-title{font-family:'Playfair Display',serif;font-size:22px;}
 
-.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;background:var(--navy-light);color:var(--navy-mid);margin-right:4px;margin-bottom:4px;}
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;background:var(--navy-light);color:var(--navy-mid);margin-right:4px;}
 
-.spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-.result-preview{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:12px;}
-.result-preview h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
-.result-preview p{font-size:12.5px;color:var(--mid);margin-bottom:2px;}
+.finder-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;}
+@media(max-width:860px){.finder-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.finder-grid{grid-template-columns:1fr;}}
 
-.hidden{display:none !important;}
-.mt-2{margin-top:8px;}
-.mt-3{margin-top:12px;}
 .flex{display:flex;gap:10px;flex-wrap:wrap;}
+.hidden{display:none !important;}
 </style>
 </head>
 <body>
@@ -138,353 +156,76 @@ tr:hover td{background:#FAFAF8;}
       <div class="logo-mark">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2a10 10 0 1 0 10 10" stroke="#fff" stroke-width="2" fill="none"/></svg>
       </div>
-      <div class="logo-text">Autoflow <span style="font-size:13px;color:var(--faint);font-family:'DM Sans',sans-serif;font-weight:400">— Admin</span></div>
+      <div class="logo-text">Autoflow <span style="font-size:13px;color:var(--faint);font-family:'DM Sans',sans-serif;font-weight:400">— Dashboard</span></div>
     </div>
     <a href="index.html" class="back-link">← Back to site</a>
   </div>
 </nav>
 
-<div class="wrap" style="padding-top:32px;padding-bottom:60px;">
+<div class="wrap">
 
-  <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-num" id="statProspects">0</div>
-      <div class="stat-label">Prospects found</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statEmailed">0</div>
-      <div class="stat-label">Emails sent</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statReplies">0</div>
-      <div class="stat-label">Replies</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statBooked">0</div>
-      <div class="stat-label">Meetings booked</div>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('prospect')">Prospect Finder</div>
-    <div class="tab" onclick="switchTab('email')">Email Forge</div>
-    <div class="tab" onclick="switchTab('campaigns')">Campaigns</div>
-    <div class="tab" onclick="switchTab('subscribers')">Subscribers</div>
-    <div class="tab" onclick="switchTab('settings')">Settings</div>
-  </div>
-
-  <div class="panel active" id="panel-prospect">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Find Targets</div>
-            <div class="card-sub">Pick a vertical and city. Claude will find real businesses that need a receptionist.</div>
-          </div>
-        </div>
-        <div class="fg">
-          <label>Industry / Vertical</label>
-          <select id="pfIndustry">
-            <option value="law">Law Firms</option>
-            <option value="dental">Dental Offices</option>
-            <option value="medical">Medical Practices</option>
-            <option value="hvac">HVAC / Plumbing</option>
-            <option value="auto">Auto Dealerships</option>
-            <option value="re">Real Estate Agencies</option>
-            <option value="accounting">Accounting Firms</option>
-            <option value="insurance">Insurance Agencies</option>
-            <option value="vet">Veterinary Clinics</option>
-            <option value="chiro">Chiropractors</option>
-            <option value="spa">Spas & MedSpas</option>
-            <option value="hotel">Hotels & Motels</option>
-            <option value="general">General Small Business</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>City + State</label>
-          <input type="text" id="pfCity" placeholder="e.g. Houston TX" value="Houston TX">
-        </div>
-        <div class="fg">
-          <label>Pain Signal</label>
-          <select id="pfPain">
-            <option value="missed">Missed calls / No answer</option>
-            <option value="reviews">Bad reviews mentioning front desk</option>
-            <option value="hours">No after-hours answering</option>
-            <option value="growth">Growing fast, need coverage</option>
-            <option value="cost">High staffing costs</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Number of prospects</label>
-          <select id="pfCount">
-            <option value="10">10</option>
-            <option value="20" selected>20</option>
-            <option value="50">50</option>
-          </select>
-        </div>
-        <div class="flex">
-          <button class="btn btn-primary" id="runClaudeBtn" onclick="runClaudeFinder()">
-            <span id="btnText">Run Claude Finder</span>
-          </button>
-          <button class="btn btn-outline" onclick="generateProspectPrompt()">Manual Prompt</button>
-        </div>
-        <div id="finderStatus" style="margin-top:12px;font-size:13px;"></div>
+  <!-- STATS -->
+  <div class="section">
+    <div class="stats-row">
+      <div class="stat-box revenue">
+        <div class="stat-num" id="statMRR">$0</div>
+        <div class="stat-label">Monthly Recurring Revenue</div>
+        <div class="stat-change" id="statMRRChange">0 active subscribers</div>
       </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Cost Comparison</div>
-            <div class="card-sub">The pitch numbers Claude will use in every email.</div>
-          </div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;">
-            <span>3 Human Receptionists</span>
-            <span class="mono">~$9,600/mo</span>
-          </div>
-          <div style="background:var(--bg);border-radius:4px;height:28px;overflow:hidden;">
-            <div style="background:var(--faint);height:100%;width:100%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:11px;font-weight:600;color:#fff;">$9.6K</div>
-          </div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;">
-            <span>5 Human Receptionists</span>
-            <span class="mono">~$16,000/mo</span>
-          </div>
-          <div style="background:var(--bg);border-radius:4px;height:28px;overflow:hidden;">
-            <div style="background:var(--faint);height:100%;width:100%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:11px;font-weight:600;color:#fff;">$16K</div>
-          </div>
-        </div>
-        <div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--navy);margin-bottom:6px;">
-            <span>Autoflow AI Receptionist</span>
-            <span class="mono">$599/mo</span>
-          </div>
-          <div style="background:var(--bg);border-radius:4px;height:28px;overflow:hidden;">
-            <div style="background:var(--navy);height:100%;width:6%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;">$599</div>
-          </div>
-        </div>
-        <div class="alert alert-info mt-3">
-          <div>
-            <strong>Savings:</strong> Replacing 3 staff saves ~$8,900/mo. Replacing 5 saves ~$15,400/mo. The AI never calls in sick, works 24/7, and speaks Spanish.
-          </div>
-        </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statActive">0</div>
+        <div class="stat-label">Active Subscribers</div>
+        <div class="stat-change" id="statActiveChange">0 total</div>
       </div>
-    </div>
-
-    <div class="card hidden" id="claudeResultsCard">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Claude Found These Prospects</div>
-          <div class="card-sub">Review and edit before adding to your campaign tracker.</div>
-        </div>
+      <div class="stat-box prospects">
+        <div class="stat-num" id="statProspects">0</div>
+        <div class="stat-label">Prospects Found</div>
+        <div class="stat-change" id="statProspectsChange">0 contacted</div>
       </div>
-      <div id="claudeResultsList" style="margin-bottom:16px;"></div>
-      <div class="flex">
-        <button class="btn btn-success" onclick="addClaudeResultsToCampaigns()">Add All to Campaigns</button>
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('claudeResultsCard').classList.add('hidden')">Hide</button>
-      </div>
-    </div>
-
-    <div class="card hidden" id="prospectPromptCard">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Claude Prompt — Copy & Paste</div>
-          <div class="card-sub">Use this if the direct API call fails or you want to run Claude manually.</div>
-        </div>
-      </div>
-      <div class="prompt-box">
-        <div class="prompt-label">System Prompt</div>
-        <div id="prospectPromptText" style="white-space:pre-wrap;word-break:break-word;"></div>
-        <button class="copy-btn" onclick="copyPrompt('prospectPromptText')">Copy</button>
-      </div>
-      <div class="fg mt-3">
-        <label>Paste Claude's JSON output here</label>
-        <textarea id="prospectResult" rows="6" placeholder='[{"name":"Smith & Associates","email":"info@smithlaw.com"}, ...]'></textarea>
-        <small>Paste the exact JSON array Claude returns. The table below will auto-populate.</small>
-      </div>
-      <div class="flex">
-        <button class="btn btn-success" onclick="parseProspects()">Load into Campaigns</button>
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('prospectPromptCard').classList.add('hidden')">Hide</button>
+      <div class="stat-box emails">
+        <div class="stat-num" id="statEmails">0</div>
+        <div class="stat-label">Emails Sent</div>
+        <div class="stat-change" id="statEmailsChange">0 replies</div>
       </div>
     </div>
   </div>
 
-  <div class="panel" id="panel-email">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header">
+  <!-- CHARTS -->
+  <div class="section">
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-header">
           <div>
-            <div class="card-title">Draft the Pitch</div>
-            <div class="card-sub">Select a prospect from your campaign list and Claude will write a personalized cold email.</div>
+            <div class="chart-title">Revenue Over Time</div>
+            <div class="chart-sub">Monthly recurring revenue trend</div>
           </div>
         </div>
-        <div class="fg">
-          <label>Select Prospect</label>
-          <select id="efProspect"><option value="">— Choose from campaigns —</option></select>
+        <div class="chart-wrap">
+          <canvas id="revenueChart"></canvas>
         </div>
-        <div class="fg">
-          <label>Or enter manually</label>
-          <input type="text" id="efName" placeholder="Business name">
-        </div>
-        <div class="fg">
-          <input type="text" id="efType" placeholder="Type (e.g. Dental Office)">
-        </div>
-        <div class="fg">
-          <textarea id="efAngle" rows="3" placeholder="Why they need this? (e.g. 'Front desk only open 9-5, patients complain about missed calls after hours')"></textarea>
-        </div>
-        <div class="fg">
-          <label>Tone</label>
-          <select id="efTone">
-            <option value="direct">Direct — cut to the savings</option>
-            <option value="consultative" selected>Consultative — diagnose the pain first</option>
-            <option value="urgent">Urgent — limited spots in their city</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" onclick="generateEmailPrompt()">Generate Email Prompt</button>
       </div>
-
-      <div class="card">
-        <div class="card-header">
+      <div class="chart-card">
+        <div class="chart-header">
           <div>
-            <div class="card-title">Email Templates</div>
-            <div class="card-sub">Quick copy-paste starters you can customize.</div>
+            <div class="chart-title">Plan Breakdown</div>
+            <div class="chart-sub">Subscribers by plan type</div>
           </div>
         </div>
-        <div style="margin-bottom:16px;">
-          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:8px;">Template A — The Cost Shock</div>
-          <div style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px;font-size:13px;color:var(--mid);line-height:1.65;">
-            Subject: Cutting $9,000/mo from your front desk<br><br>
-            Hi [Name],<br><br>
-            Most [industry] offices in [city] spend $9,000–$16,000/month on 3–5 front-desk staff before benefits, taxes, and turnover. Autoflow replaces that with a 24/7 AI receptionist for $599 flat.<br><br>
-            It answers every call in under 2 rings, books appointments straight into your calendar, and speaks English and Spanish. No missed calls. No sick days. No training.<br><br>
-            Worth a 10-minute conversation this week?<br><br>
-            Best,<br>
-            [Your name]
-          </div>
-          <button class="btn btn-sm btn-outline mt-2" onclick="copyTemplate(this)">Copy</button>
+        <div class="chart-wrap pie">
+          <canvas id="planChart"></canvas>
         </div>
-        <div>
-          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:8px;">Template B — The Pain Mirror</div>
-          <div style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px;font-size:13px;color:var(--mid);line-height:1.65;">
-            Subject: After-hours calls going to voicemail?<br><br>
-            Hi [Name],<br><br>
-            I noticed [specific pain signal]. That usually means revenue is walking to the competitor who answers the phone at 7 PM.<br><br>
-            We built Autoflow specifically for [industry] practices in [city] — an AI receptionist that handles booking, FAQs, and lead capture around the clock for less than one day's pay of a human receptionist.<br><br>
-            Can I send you a 2-minute demo video?<br><br>
-            Best,<br>
-            [Your name]
-          </div>
-          <button class="btn btn-sm btn-outline mt-2" onclick="copyTemplate(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card hidden" id="emailPromptCard">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Claude Email Prompt</div>
-          <div class="card-sub">Paste this into Claude. It will return a subject line + body you can paste into Gmail/Outlook.</div>
-        </div>
-      </div>
-      <div class="prompt-box">
-        <div class="prompt-label">Email Prompt</div>
-        <div id="emailPromptText" style="white-space:pre-wrap;word-break:break-word;"></div>
-        <button class="copy-btn" onclick="copyPrompt('emailPromptText')">Copy</button>
-      </div>
-      <div class="fg mt-3">
-        <label>Paste Claude's email output here (optional)</label>
-        <textarea id="emailResult" rows="6" placeholder="Paste subject + body here to save to this prospect's record..."></textarea>
-      </div>
-      <div class="flex">
-        <button class="btn btn-success" onclick="saveEmailToProspect()">Save to Prospect Record</button>
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('emailPromptCard').classList.add('hidden')">Hide</button>
       </div>
     </div>
   </div>
 
-  <div class="panel" id="panel-campaigns">
+  <!-- SUBSCRIBERS SECTION -->
+  <div class="section">
+    <div class="sec-title">Subscribers</div>
+    <div class="sec-sub">Current paying clients, their plans, and status. Click Edit to update.</div>
     <div class="card">
       <div class="card-header">
-        <div>
-          <div class="card-title">Campaign Tracker</div>
-          <div class="card-sub">All your prospects, emails, and follow-ups in one place. Stored locally on this device.</div>
-        </div>
-        <div class="flex">
-          <button class="btn btn-sm btn-outline" onclick="exportCSV()">Export CSV</button>
-          <button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Business</th>
-              <th>Type</th>
-              <th>City</th>
-              <th>Angle / Pain</th>
-              <th>Status</th>
-              <th>Email Sent</th>
-              <th>Notes</th>
-              <th style="width:90px">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="campaignTable"></tbody>
-        </table>
-      </div>
-      <div id="emptyState" style="text-align:center;padding:40px;color:var(--faint);font-size:13px;">
-        No prospects yet. Use the <strong>Prospect Finder</strong> to generate targets, then load them here.
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title" style="font-size:18px;margin-bottom:16px;">Add Prospect Manually</div>
-      <div class="grid-3">
-        <div class="fg">
-          <label>Business Name</label>
-          <input type="text" id="manName" placeholder="e.g. River Oaks Dental">
-        </div>
-        <div class="fg">
-          <label>Type</label>
-          <input type="text" id="manType" placeholder="e.g. Dental Office">
-        </div>
-        <div class="fg">
-          <label>City</label>
-          <input type="text" id="manCity" placeholder="e.g. Houston TX">
-        </div>
-      </div>
-      <div class="fg">
-        <label>Pain / Angle</label>
-        <input type="text" id="manAngle" placeholder="e.g. No weekend answering, losing implant consults">
-      </div>
-      <button class="btn btn-primary" onclick="addManual()">Add to Campaign</button>
-    </div>
-  </div>
-
-  <div class="panel" id="panel-subscribers">
-    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="stat-card">
-        <div class="stat-num" id="subTotal">0</div>
-        <div class="stat-label">Total subscribers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="subMRR">$0</div>
-        <div class="stat-label">Monthly recurring</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="subActive">0</div>
-        <div class="stat-label">Active right now</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">All Subscribers</div>
-          <div class="card-sub">Paying clients on monthly plans. Add manually when Stripe notifies you of a new signup.</div>
-        </div>
-        <div class="flex">
+        <div class="card-title">All Subscribers</div>
+        <div class="card-actions">
           <button class="btn btn-sm btn-outline" onclick="exportSubCSV()">Export CSV</button>
           <button class="btn btn-sm btn-danger" onclick="clearSubs()">Clear All</button>
         </div>
@@ -500,20 +241,21 @@ tr:hover td{background:#FAFAF8;}
               <th>Status</th>
               <th>Started</th>
               <th>Notes</th>
-              <th style="width:90px">Actions</th>
+              <th style="width:80px">Action</th>
             </tr>
           </thead>
           <tbody id="subTable"></tbody>
         </table>
       </div>
-      <div id="subEmpty" style="text-align:center;padding:40px;color:var(--faint);font-size:13px;">
-        No subscribers yet. Add them manually when they sign up via Stripe.
+      <div id="subEmpty" class="empty">
+        <div class="empty-icon">👤</div>
+        No subscribers yet. Add your first paying client below.
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="margin-top:20px;">
       <div class="card-title" style="font-size:18px;margin-bottom:16px;">Add New Subscriber</div>
-      <div class="grid-3">
+      <div class="form-row">
         <div class="fg">
           <label>Name</label>
           <input type="text" id="subName" placeholder="e.g. Dr. Sarah Patel">
@@ -522,12 +264,12 @@ tr:hover td{background:#FAFAF8;}
           <label>Email</label>
           <input type="email" id="subEmail" placeholder="sarah@pateldental.com">
         </div>
+      </div>
+      <div class="form-row">
         <div class="fg">
           <label>Company</label>
           <input type="text" id="subCompany" placeholder="e.g. Patel Dental Group">
         </div>
-      </div>
-      <div class="grid-3">
         <div class="fg">
           <label>Plan</label>
           <select id="subPlan">
@@ -536,6 +278,8 @@ tr:hover td{background:#FAFAF8;}
             <option value="Enterprise">Enterprise — Custom</option>
           </select>
         </div>
+      </div>
+      <div class="form-row">
         <div class="fg">
           <label>Status</label>
           <select id="subStatus">
@@ -557,68 +301,267 @@ tr:hover td{background:#FAFAF8;}
     </div>
   </div>
 
-  <div class="panel" id="panel-settings">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Your Info</div>
-            <div class="card-sub">Used for email sign-offs and prompt personalization.</div>
-          </div>
+  <!-- PROSPECTS SECTION -->
+  <div class="section">
+    <div class="sec-title">Prospects</div>
+    <div class="sec-sub">Find leads with Claude, track outreach, and manage your pipeline.</div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title" style="font-size:18px;margin-bottom:16px;">Claude Prospect Finder</div>
+      <div class="finder-grid">
+        <div class="fg">
+          <label>Industry</label>
+          <select id="pfIndustry">
+            <option value="law">Law Firms</option>
+            <option value="dental">Dental Offices</option>
+            <option value="medical">Medical Practices</option>
+            <option value="hvac">HVAC / Plumbing</option>
+            <option value="auto">Auto Dealerships</option>
+            <option value="re">Real Estate</option>
+            <option value="accounting">Accounting</option>
+            <option value="insurance">Insurance</option>
+            <option value="vet">Veterinary</option>
+            <option value="chiro">Chiropractors</option>
+            <option value="spa">Spas & MedSpas</option>
+            <option value="hotel">Hotels</option>
+            <option value="general">General</option>
+          </select>
         </div>
         <div class="fg">
+          <label>City</label>
+          <input type="text" id="pfCity" placeholder="Houston TX" value="Houston TX">
+        </div>
+        <div class="fg">
+          <label>Pain Signal</label>
+          <select id="pfPain">
+            <option value="missed">Missed calls</option>
+            <option value="reviews">Bad reviews</option>
+            <option value="hours">No after-hours</option>
+            <option value="growth">Growing fast</option>
+            <option value="cost">High staffing costs</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Count</label>
+          <select id="pfCount">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex" style="margin-top:8px;">
+        <button class="btn btn-primary" id="runClaudeBtn" onclick="runClaudeFinder()">
+          <span id="btnText">Run Claude Finder</span>
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="generateProspectPrompt()">Manual Prompt</button>
+      </div>
+      <div id="finderStatus" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card hidden" id="claudeResultsCard">
+      <div class="card-header">
+        <div class="card-title" style="font-size:18px;">Claude Found These Prospects</div>
+      </div>
+      <div id="claudeResultsList" style="margin-bottom:16px;"></div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="addClaudeResultsToCampaigns()">Add All to Campaigns</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('claudeResultsCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="prospectPromptCard">
+      <div class="card-header">
+        <div class="card-title" style="font-size:18px;">Manual Claude Prompt</div>
+      </div>
+      <div style="background:#0F172A;border-radius:8px;padding:16px;color:#E2E8F0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;position:relative;">
+        <div id="prospectPromptText" style="white-space:pre-wrap;word-break:break-word;"></div>
+        <button style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);color:#fff;border:none;padding:5px 10px;border-radius:4px;font-size:11px;cursor:pointer;" onclick="copyPrompt('prospectPromptText')">Copy</button>
+      </div>
+      <div class="fg" style="margin-top:12px;">
+        <label>Paste Claude's JSON output here</label>
+        <textarea id="prospectResult" rows="4" placeholder='[{"name":"...","email":"..."}]'></textarea>
+      </div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="parseProspects()">Load into Campaigns</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('prospectPromptCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Campaign Tracker</div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="exportCSV()">Export CSV</button>
+          <button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Email</th>
+              <th>Type</th>
+              <th>City</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th style="width:80px">Action</th>
+            </tr>
+          </thead>
+          <tbody id="campaignTable"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="empty">
+        <div class="empty-icon">🎯</div>
+        No prospects yet. Use the finder above to generate targets.
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title" style="font-size:18px;margin-bottom:16px;">Add Prospect Manually</div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Business Name</label>
+          <input type="text" id="manName" placeholder="River Oaks Dental">
+        </div>
+        <div class="fg">
+          <label>Email</label>
+          <input type="text" id="manEmail" placeholder="info@riveroaksdental.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Type</label>
+          <input type="text" id="manType" placeholder="Dental Office">
+        </div>
+        <div class="fg">
+          <label>City</label>
+          <input type="text" id="manCity" placeholder="Houston TX">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Pain / Angle</label>
+        <input type="text" id="manAngle" placeholder="No weekend answering, losing implant consults">
+      </div>
+      <button class="btn btn-primary" onclick="addManual()">Add to Campaign</button>
+    </div>
+  </div>
+
+  <!-- EMAIL FORGE -->
+  <div class="section">
+    <div class="sec-title">Email Forge</div>
+    <div class="sec-sub">Generate personalized cold emails for any prospect.</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title" style="font-size:18px;margin-bottom:16px;">Draft Email</div>
+        <div class="fg">
+          <label>Select Prospect</label>
+          <select id="efProspect"><option value="">— Choose from campaigns —</option></select>
+        </div>
+        <div class="fg">
+          <label>Or enter manually</label>
+          <input type="text" id="efName" placeholder="Business name">
+        </div>
+        <div class="fg">
+          <input type="text" id="efType" placeholder="Type (e.g. Dental Office)">
+        </div>
+        <div class="fg">
+          <textarea id="efAngle" rows="3" placeholder="Why they need this?"></textarea>
+        </div>
+        <div class="fg">
+          <label>Tone</label>
+          <select id="efTone">
+            <option value="direct">Direct</option>
+            <option value="consultative" selected>Consultative</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="generateEmailPrompt()">Generate Prompt</button>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-size:18px;margin-bottom:16px;">Templates</div>
+        <div style="margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:6px;">Template A — Cost Shock</div>
+          <div style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px;font-size:12.5px;color:var(--mid);line-height:1.6;">
+            Subject: Cutting $9,000/mo from your front desk<br><br>
+            Hi [Name],<br><br>
+            Most [industry] offices spend $9K–$16K/month on front-desk staff. Autoflow replaces that with a 24/7 AI receptionist for $599 flat.<br><br>
+            Worth a 10-minute conversation this week?<br><br>
+            Best,<br>[Your name]
+          </div>
+          <button class="btn btn-sm btn-outline mt-2" onclick="copyTemplate(this)">Copy</button>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:6px;">Template B — Pain Mirror</div>
+          <div style="background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px;font-size:12.5px;color:var(--mid);line-height:1.6;">
+            Subject: After-hours calls going to voicemail?<br><br>
+            Hi [Name],<br><br>
+            I noticed [specific pain]. That usually means revenue walks to the competitor who answers at 7 PM.<br><br>
+            Can I send you a 2-minute demo?<br><br>
+            Best,<br>[Your name]
+          </div>
+          <button class="btn btn-sm btn-outline mt-2" onclick="copyTemplate(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="emailPromptCard" style="margin-top:20px;">
+      <div class="card-header">
+        <div class="card-title" style="font-size:18px;">Claude Email Prompt</div>
+      </div>
+      <div style="background:#0F172A;border-radius:8px;padding:16px;color:#E2E8F0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;position:relative;">
+        <div id="emailPromptText" style="white-space:pre-wrap;word-break:break-word;"></div>
+        <button style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);color:#fff;border:none;padding:5px 10px;border-radius:4px;font-size:11px;cursor:pointer;" onclick="copyPrompt('emailPromptText')">Copy</button>
+      </div>
+      <div class="fg" style="margin-top:12px;">
+        <label>Paste Claude's email output here</label>
+        <textarea id="emailResult" rows="4" placeholder="Paste subject + body here..."></textarea>
+      </div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="saveEmailToProspect()">Save to Prospect</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('emailPromptCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="section" style="padding-bottom:60px;">
+    <div class="sec-title">Settings</div>
+    <div class="sec-sub">Your info and preferences.</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title" style="font-size:18px;margin-bottom:16px;">Your Info</div>
+        <div class="fg">
           <label>Your Name</label>
-          <input type="text" id="userName" placeholder="e.g. Jordan">
+          <input type="text" id="userName" placeholder="Jordan">
         </div>
         <div class="fg">
           <label>Your Email</label>
           <input type="email" id="userEmail" placeholder="you@autoflow.icu">
         </div>
         <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-        <div id="settingsSaved" style="margin-top:10px;font-size:13px;color:var(--success);display:none;">✓ Saved to local storage</div>
+        <div id="settingsSaved" class="alert alert-success hidden" style="margin-top:12px;padding:8px 12px;">✓ Saved to local storage</div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">How This Works</div>
-            <div class="card-sub">3-step workflow designed for iPhone + Vercel static hosting.</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:18px;">
-          <div style="display:flex;gap:14px;">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">1</div>
-            <div>
-              <div style="font-weight:600;font-size:14px;">Run Claude Finder</div>
-              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Pick a city and industry. Click "Run Claude Finder" — the backend calls Anthropic and returns real businesses with emails.</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:14px;">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">2</div>
-            <div>
-              <div style="font-weight:600;font-size:14px;">Review & Add</div>
-              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Claude's results appear in a preview. Edit any entry, then click "Add All to Campaigns" to save them locally.</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:14px;">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">3</div>
-            <div>
-              <div style="font-weight:600;font-size:14px;">Email & Track</div>
-              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Use the Email Forge to draft personalized pitches. Track everything in the Campaigns tab. Manage paying clients in Subscribers.</div>
-            </div>
-          </div>
-        </div>
+        <div class="card-title" style="font-size:18px;margin-bottom:16px;">About</div>
+        <p style="font-size:13.5px;color:var(--mid);line-height:1.7;margin-bottom:12px;">
+          Autoflow Dashboard tracks your prospects, campaigns, and subscribers. All data is stored locally in your browser.
+        </p>
+        <p style="font-size:13.5px;color:var(--mid);line-height:1.7;">
+          Use the <strong>Claude Prospect Finder</strong> to autonomously find leads, or add them manually. Track emails in the campaign table. Add subscribers when Stripe notifies you of a new signup.
+        </p>
       </div>
     </div>
   </div>
 
 </div>
 
+<!-- EDIT MODAL -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Update Prospect</div>
-      <div class="card-sub">Change status, add notes, or paste the email you sent.</div>
     </div>
     <div class="modal-body">
       <input type="hidden" id="editId">
@@ -634,35 +577,35 @@ tr:hover td{background:#FAFAF8;}
       </div>
       <div class="fg">
         <label>Email Body Sent</label>
-        <textarea id="editEmail" rows="4" placeholder="Paste the exact email you sent..."></textarea>
+        <textarea id="editEmail" rows="3" placeholder="Paste the exact email you sent..."></textarea>
       </div>
       <div class="fg">
-        <label>Notes / Follow-up</label>
-        <textarea id="editNotes" rows="3" placeholder="e.g. Called back at 3pm, wants demo on Tuesday"></textarea>
+        <label>Notes</label>
+        <textarea id="editNotes" rows="2" placeholder="Follow-up notes..."></textarea>
       </div>
       <div class="flex">
-        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+        <button class="btn btn-primary" onclick="saveEdit()">Save</button>
         <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- SUB EDIT MODAL -->
 <div class="modal-overlay" id="subEditModal">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Update Subscriber</div>
-      <div class="card-sub">Edit plan, status, or notes for this paying client.</div>
     </div>
     <div class="modal-body">
       <input type="hidden" id="subEditId">
-      <div class="grid-2">
+      <div class="form-row">
         <div class="fg">
           <label>Plan</label>
           <select id="subEditPlan">
-            <option value="Reputation Only">Reputation Only — $99/mo</option>
-            <option value="Full Suite">Full Suite — $599/mo</option>
-            <option value="Enterprise">Enterprise — Custom</option>
+            <option value="Reputation Only">Reputation Only</option>
+            <option value="Full Suite">Full Suite</option>
+            <option value="Enterprise">Enterprise</option>
           </select>
         </div>
         <div class="fg">
@@ -676,10 +619,10 @@ tr:hover td{background:#FAFAF8;}
       </div>
       <div class="fg">
         <label>Notes</label>
-        <textarea id="subEditNotes" rows="3" placeholder="e.g. Wants to upgrade to Enterprise next quarter"></textarea>
+        <textarea id="subEditNotes" rows="2" placeholder="Notes..."></textarea>
       </div>
       <div class="flex">
-        <button class="btn btn-primary" onclick="saveSubEdit()">Save Changes</button>
+        <button class="btn btn-primary" onclick="saveSubEdit()">Save</button>
         <button class="btn btn-outline" onclick="closeSubModal()">Cancel</button>
       </div>
     </div>
@@ -691,26 +634,125 @@ var campaigns = JSON.parse(localStorage.getItem('af_campaigns') || '[]');
 var subscribers = JSON.parse(localStorage.getItem('af_subscribers') || '[]');
 var settings = JSON.parse(localStorage.getItem('af_settings') || '{}');
 var claudeResults = [];
+var revenueChart = null;
+var planChart = null;
 
 document.addEventListener('DOMContentLoaded', function(){
   if(settings.userName) document.getElementById('userName').value = settings.userName;
   if(settings.userEmail) document.getElementById('userEmail').value = settings.userEmail;
   document.getElementById('subDate').value = new Date().toISOString().slice(0,10);
+  renderAll();
+  initCharts();
+});
+
+function renderAll(){
   renderCampaigns();
   renderSubscribers();
   updateStats();
-  updateSubStats();
   populateEmailSelect();
-});
+  updateCharts();
+}
 
-function switchTab(id){
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  event.target.classList.add('active');
-  document.getElementById('panel-'+id).classList.add('active');
-  if(id==='campaigns'){renderCampaigns();updateStats();}
-  if(id==='subscribers'){renderSubscribers();updateSubStats();}
-  if(id==='email')populateEmailSelect();
+function updateStats(){
+  var active = subscribers.filter(function(s){return s.status==='active';});
+  var mrr = active.reduce(function(sum,s){
+    return sum + (s.plan==='Reputation Only'?99:s.plan==='Full Suite'?599:0);
+  },0);
+  var totalSubs = subscribers.length;
+  var totalProspects = campaigns.length;
+  var emailed = campaigns.filter(function(c){return c.status==='sent'||c.status==='replied'||c.status==='booked';}).length;
+  var replies = campaigns.filter(function(c){return c.status==='replied'||c.status==='booked';}).length;
+
+  document.getElementById('statMRR').textContent = '$' + mrr.toLocaleString();
+  document.getElementById('statMRRChange').textContent = active.length + ' active subscribers';
+  document.getElementById('statActive').textContent = active.length;
+  document.getElementById('statActiveChange').textContent = totalSubs + ' total';
+  document.getElementById('statProspects').textContent = totalProspects;
+  document.getElementById('statProspectsChange').textContent = emailed + ' contacted';
+  document.getElementById('statEmails').textContent = emailed;
+  document.getElementById('statEmailsChange').textContent = replies + ' replies';
+}
+
+function initCharts(){
+  var revCtx = document.getElementById('revenueChart').getContext('2d');
+  revenueChart = new Chart(revCtx, {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets: [{
+        label: 'MRR',
+        data: [0,0,0,0,0,0],
+        borderColor: '#0F2744',
+        backgroundColor: 'rgba(15,39,68,0.08)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#0F2744'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#E2DDD6' }, ticks: { font: { size: 11 }, color: '#94A3B8' } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' } }
+      }
+    }
+  });
+
+  var planCtx = document.getElementById('planChart').getContext('2d');
+  planChart = new Chart(planCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Reputation Only','Full Suite','Enterprise'],
+      datasets: [{
+        data: [0,0,0],
+        backgroundColor: ['#E8EEF5','#0F2744','#7C3AED'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#4A5568', padding: 16, usePointStyle: true } }
+      },
+      cutout: '65%'
+    }
+  });
+}
+
+function updateCharts(){
+  if(!revenueChart || !planChart) return;
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var now = new Date();
+  var mrrData = [];
+  for(var i=5;i>=0;i--){
+    var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    var monthMRR = subscribers.filter(function(s){
+      if(s.status !== 'active') return false;
+      var sd = new Date(s.date);
+      return sd.getFullYear() < d.getFullYear() || (sd.getFullYear() === d.getFullYear() && sd.getMonth() <= d.getMonth());
+    }).reduce(function(sum,s){
+      return sum + (s.plan==='Reputation Only'?99:s.plan==='Full Suite'?599:0);
+    },0);
+    mrrData.push(monthMRR);
+  }
+  var labels = [];
+  for(var i=5;i>=0;i--){
+    var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    labels.push(months[d.getMonth()]);
+  }
+  revenueChart.data.labels = labels;
+  revenueChart.data.datasets[0].data = mrrData;
+  revenueChart.update();
+
+  var repCount = subscribers.filter(function(s){return s.plan==='Reputation Only' && s.status==='active';}).length;
+  var fullCount = subscribers.filter(function(s){return s.plan==='Full Suite' && s.status==='active';}).length;
+  var entCount = subscribers.filter(function(s){return s.plan==='Enterprise' && s.status==='active';}).length;
+  planChart.data.datasets[0].data = [repCount, fullCount, entCount];
+  planChart.update();
 }
 
 function saveSettings(){
@@ -718,8 +760,8 @@ function saveSettings(){
   settings.userEmail = document.getElementById('userEmail').value.trim();
   localStorage.setItem('af_settings', JSON.stringify(settings));
   var el = document.getElementById('settingsSaved');
-  el.style.display='block';
-  setTimeout(function(){el.style.display='none';}, 2000);
+  el.classList.remove('hidden');
+  setTimeout(function(){el.classList.add('hidden');}, 2000);
 }
 
 function runClaudeFinder(){
@@ -732,8 +774,8 @@ function runClaudeFinder(){
   var status = document.getElementById('finderStatus');
 
   btn.disabled = true;
-  btnText.innerHTML = '<span class="spinner"></span> Claude is researching...';
-  status.innerHTML = '<span style="color:var(--faint);">Calling Claude API... this takes 10-30 seconds.</span>';
+  btnText.innerHTML = '<span class="spinner"></span> Finding...';
+  status.innerHTML = '<span style="color:var(--faint);">Calling Claude API (10-30s)...</span>';
   claudeResults = [];
 
   fetch('/api/prospects', {
@@ -750,69 +792,53 @@ function runClaudeFinder(){
       status.innerHTML = '<span style="color:var(--danger);">Error: ' + esc(data.error) + '</span>';
       return;
     }
-
     if(!data.prospects || data.prospects.length === 0){
-      status.innerHTML = '<span style="color:var(--warning);">No prospects found. Try different criteria.</span>';
+      status.innerHTML = '<span style="color:var(--warning);">No prospects found.</span>';
       return;
     }
 
     claudeResults = data.prospects.map(function(p){
-      return {
-        name: p.name || 'Unknown Business',
-        email: p.email || '',
-        type: p.type || 'Business',
-        why: p.why || '',
-        angle: p.angle || ''
-      };
+      return { name: p.name || 'Unknown', email: p.email || '', type: p.type || 'Business', why: p.why || '', angle: p.angle || '' };
     });
 
     var html = '';
     claudeResults.forEach(function(p, i){
-      html += '<div class="result-preview">' +
-        '<h4>' + (i+1) + '. ' + esc(p.name) + '</h4>' +
-        '<p><strong>Email:</strong> ' + esc(p.email) + '</p>' +
-        '<p><strong>Type:</strong> ' + esc(p.type) + '</p>' +
-        (p.why ? '<p><strong>Why:</strong> ' + esc(p.why) + '</p>' : '') +
-        (p.angle ? '<p><strong>Angle:</strong> ' + esc(p.angle) + '</p>' : '') +
-        '</div>';
+      html += '<div class="mini-item">' +
+        '<div class="mini-dot" style="background:var(--navy);"></div>' +
+        '<div class="mini-info">' +
+          '<div class="mini-name">' + esc(p.name) + '</div>' +
+          '<div class="mini-meta">' + esc(p.email) + ' · ' + esc(p.type) + '</div>' +
+        '</div>' +
+      '</div>';
     });
 
     document.getElementById('claudeResultsList').innerHTML = html;
     document.getElementById('claudeResultsCard').classList.remove('hidden');
     document.getElementById('claudeResultsCard').scrollIntoView({behavior:'smooth'});
-    status.innerHTML = '<span style="color:var(--success);">✓ Found ' + claudeResults.length + ' prospects. Review below before adding.</span>';
+    status.innerHTML = '<span style="color:var(--success);">✓ Found ' + claudeResults.length + ' prospects</span>';
   })
   .catch(function(err){
     btn.disabled = false;
     btnText.innerHTML = 'Run Claude Finder';
-    status.innerHTML = '<span style="color:var(--danger);">Network error: ' + esc(err.message) + '. Try the Manual Prompt option.</span>';
+    status.innerHTML = '<span style="color:var(--danger);">Error: ' + esc(err.message) + '. Try Manual Prompt.</span>';
   });
 }
 
 function addClaudeResultsToCampaigns(){
   if(claudeResults.length === 0){alert('No results to add.');return;}
   var city = document.getElementById('pfCity').value.trim() || 'Houston TX';
-  var added = 0;
   claudeResults.forEach(function(item){
     campaigns.push({
       id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
-      name: item.name,
-      type: item.type || 'Business',
-      city: city,
-      angle: item.angle || item.why || '',
-      status: 'pending',
-      emailSent: '',
-      notes: item.email ? 'Email: ' + item.email : '',
+      name: item.name, email: item.email || '', type: item.type || 'Business', city: city,
+      angle: item.angle || item.why || '', status: 'pending', emailSent: '', notes: '',
       created: new Date().toISOString()
     });
-    added++;
   });
   saveCampaigns();
-  renderCampaigns();
-  updateStats();
-  populateEmailSelect();
+  renderAll();
   document.getElementById('claudeResultsCard').classList.add('hidden');
-  document.getElementById('finderStatus').innerHTML = '<span style="color:var(--success);">✓ Added ' + added + ' prospects to Campaigns.</span>';
+  document.getElementById('finderStatus').innerHTML = '<span style="color:var(--success);">✓ Added ' + claudeResults.length + ' to campaigns</span>';
   claudeResults = [];
 }
 
@@ -828,114 +854,63 @@ function generateProspectPrompt(){
     vet:'veterinary clinics', chiro:'chiropractors', spa:'spas and medspas', hotel:'hotels and motels', general:'small businesses'
   };
   var pains = {
-    missed:'no one answers the phone after hours or during lunch — callers go straight to voicemail',
-    reviews:'recent 1-2 star reviews specifically complain about rude front desk or long hold times',
-    hours:'the business closes at 5 PM but customers call at 6-8 PM and no one is there',
-    growth:'they are hiring multiple front-desk staff but still missing calls during busy periods',
-    cost:'they currently employ 3-5 receptionists and the owner has mentioned staffing costs publicly'
+    missed:'no one answers the phone after hours or during lunch',
+    reviews:'bad reviews mention rude front desk or long hold times',
+    hours:'business closes at 5 PM but customers call at 6-8 PM',
+    growth:'hiring multiple front-desk staff but still missing calls',
+    cost:'currently employ 3-5 receptionists, high staffing costs'
   };
 
-  var prompt = 'You are a lead researcher for Autoflow, an AI receptionist company.\\n\\n' +
-    'Find ' + count + ' real ' + verticals[industry] + ' in ' + city + ' that likely need a 24/7 AI receptionist.\\n\\n' +
-    'Focus on businesses showing this pain signal: ' + pains[pain] + '.\\n\\n' +
-    'For each business, provide ONLY:\\n' +
-    '- name (real business name or contact person)\\n' +
-    '- email (best guess business email, formatted as info@company.com or similar)\\n\\n' +
-    'Return ONLY a valid JSON array. No markdown, no explanation. Example:\\n' +
-    '[{"name":"River Oaks Dental","email":"info@riveroaksdental.com"},{"name":"Smith Law Firm","email":"contact@smithlaw.com"}]\\n\\n' +
-    'Make every entry realistic and specific to ' + city + '.';
+  var prompt = 'You are a lead researcher for Autoflow, an AI receptionist company.\n\n' +
+    'Find ' + count + ' real ' + verticals[industry] + ' in ' + city + ' that likely need a 24/7 AI receptionist.\n\n' +
+    'Focus on: ' + pains[pain] + '.\n\n' +
+    'For each, provide ONLY name and email (best guess like info@company.com).\n' +
+    'Return ONLY a valid JSON array. Example: [{"name":"River Oaks Dental","email":"info@riveroaksdental.com"}]\n\n' +
+    'Make entries realistic and specific to ' + city + '.';
 
   document.getElementById('prospectPromptText').textContent = prompt;
   document.getElementById('prospectPromptCard').classList.remove('hidden');
   document.getElementById('prospectPromptCard').scrollIntoView({behavior:'smooth'});
 }
 
-function generateEmailPrompt(){
-  var sel = document.getElementById('efProspect').value;
-  var name = document.getElementById('efName').value.trim();
-  var type = document.getElementById('efType').value.trim();
-  var angle = document.getElementById('efAngle').value.trim();
-  var tone = document.getElementById('efTone').value;
-  var myName = settings.userName || '[Your name]';
-
-  if(sel){
-    var p = campaigns.find(function(c){return c.id===sel;});
-    if(p){name=p.name;type=p.type;angle=p.angle;}
-  }
-  if(!name){alert('Enter a business name or select a prospect.');return;}
-
-  var toneInstructions = {
-    direct:'Be direct. Lead with the cost comparison in the first sentence. No fluff.',
-    consultative:'Be consultative. Ask a diagnostic question first. Then show the cost comparison as the solution.',
-    urgent:'Create mild urgency. Mention we are onboarding a limited number of practices in their city this month.'
-  };
-
-  var prompt = 'Write a cold email to ' + name + ', a ' + type + '.\\n\\n' +
-    'Context: ' + angle + '\\n\\n' +
-    'Product: Autoflow — AI receptionist that answers calls 24/7, books appointments, handles FAQs, and speaks English and Spanish. $599/month flat.\\n\\n' +
-    'Key comparison to weave in: hiring 3 human receptionists costs ~$9,600/month (plus benefits, taxes, turnover). Hiring 5 costs ~$16,000/month. Autoflow is $599.\\n\\n' +
-    'Tone instruction: ' + toneInstructions[tone] + '\\n\\n' +
-    'Requirements:\\n' +
-    '- Subject line under 8 words\\n' +
-    '- First sentence must reference their specific pain\\n' +
-    '- Include the 3-receptionist vs $599 comparison explicitly\\n' +
-    '- End with one low-friction CTA (reply, 10-min call, or demo video)\\n' +
-    '- Sign off as "' + myName + '" from Autoflow\\n' +
-    '- Total length: 120-160 words\\n\\n' +
-    'Return ONLY the subject line and body text. No JSON, no markdown headers.';
-
-  document.getElementById('emailPromptText').textContent = prompt;
-  document.getElementById('emailPromptCard').classList.remove('hidden');
-  document.getElementById('emailPromptCard').scrollIntoView({behavior:'smooth'});
-}
-
 function parseProspects(){
   var raw = document.getElementById('prospectResult').value.trim();
-  if(!raw){alert('Paste Claude\'s JSON first.');return;}
+  if(!raw){alert('Paste JSON first.');return;}
   try{
     var arr = JSON.parse(raw);
     if(!Array.isArray(arr)){alert('Expected a JSON array.');return;}
     var city = document.getElementById('pfCity').value.trim() || 'Houston TX';
-    var added = 0;
     arr.forEach(function(item){
       campaigns.push({
         id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
-        name: item.name || 'Unknown',
-        type: item.type || 'Business',
-        city: city,
-        angle: item.why || item.angle || '',
-        status: 'pending',
-        emailSent: '',
-        notes: item.email ? 'Email: ' + item.email : '',
+        name: item.name || 'Unknown', email: item.email || '', type: item.type || 'Business', city: city,
+        angle: item.why || item.angle || '', status: 'pending', emailSent: '', notes: '',
         created: new Date().toISOString()
       });
-      added++;
     });
     saveCampaigns();
-    renderCampaigns();
-    updateStats();
-    populateEmailSelect();
-    alert('Added ' + added + ' prospects to Campaigns.');
+    renderAll();
+    alert('Added ' + arr.length + ' prospects.');
     document.getElementById('prospectResult').value='';
-  }catch(e){alert('Invalid JSON. Make sure you copied the array exactly.\\nError: ' + e.message);}
+  }catch(e){alert('Invalid JSON.\nError: ' + e.message);}
 }
 
 function addManual(){
   var name = document.getElementById('manName').value.trim();
+  var email = document.getElementById('manEmail').value.trim();
   var type = document.getElementById('manType').value.trim();
   var city = document.getElementById('manCity').value.trim();
   var angle = document.getElementById('manAngle').value.trim();
   if(!name){alert('Business name required.');return;}
   campaigns.push({
     id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
-    name:name, type:type||'Business', city:city||'Unknown', angle:angle,
-    status:'pending', emailSent:'', notes:'', created:new Date().toISOString()
+    name: name, email: email, type: type || 'Business', city: city || 'Unknown', angle: angle,
+    status: 'pending', emailSent: '', notes: '', created: new Date().toISOString()
   });
   saveCampaigns();
-  renderCampaigns();
-  updateStats();
-  populateEmailSelect();
+  renderAll();
   document.getElementById('manName').value='';
+  document.getElementById('manEmail').value='';
   document.getElementById('manType').value='';
   document.getElementById('manCity').value='';
   document.getElementById('manAngle').value='';
@@ -949,35 +924,63 @@ function renderCampaigns(){
   tbody.innerHTML = campaigns.map(function(c){
     var statusClass = 'status-' + c.status;
     var statusText = {pending:'Pending',sent:'Sent',replied:'Replied',booked:'Booked',closed:'Closed'}[c.status] || c.status;
-    var emailPreview = c.emailSent ? (c.emailSent.substring(0,60)+'...') : '—';
     return '<tr>' +
       '<td><strong style="color:var(--text);">' + esc(c.name) + '</strong></td>' +
+      '<td class="mono" style="font-size:12px;">' + esc(c.email || '—') + '</td>' +
       '<td>' + esc(c.type) + '</td>' +
       '<td>' + esc(c.city) + '</td>' +
-      '<td style="max-width:220px;font-size:12.5px;">' + esc(c.angle) + '</td>' +
       '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
-      '<td style="max-width:180px;font-size:12px;color:var(--faint);">' + esc(emailPreview) + '</td>' +
-      '<td style="max-width:180px;font-size:12px;color:var(--faint);">' + esc(c.notes) + '</td>' +
+      '<td style="font-size:12px;color:var(--faint);max-width:180px;">' + esc(c.notes) + '</td>' +
       '<td><button class="btn btn-sm btn-outline" onclick="openEdit(\'' + c.id + '\')">Edit</button></td>' +
     '</tr>';
   }).join('');
 }
 
 function esc(s){return (s||'').replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-
 function saveCampaigns(){localStorage.setItem('af_campaigns', JSON.stringify(campaigns));}
-
-function updateStats(){
-  document.getElementById('statProspects').textContent = campaigns.length;
-  document.getElementById('statEmailed').textContent = campaigns.filter(function(c){return c.status==='sent'||c.status==='replied'||c.status==='booked';}).length;
-  document.getElementById('statReplies').textContent = campaigns.filter(function(c){return c.status==='replied'||c.status==='booked';}).length;
-  document.getElementById('statBooked').textContent = campaigns.filter(function(c){return c.status==='booked';}).length;
-}
 
 function populateEmailSelect(){
   var sel = document.getElementById('efProspect');
   sel.innerHTML = '<option value="">— Choose from campaigns —</option>' +
-    campaigns.map(function(c){return '<option value="' + c.id + '">' + esc(c.name) + ' (' + esc(c.type) + ')</option>';}).join('');
+    campaigns.map(function(c){return '<option value="' + c.id + '">' + esc(c.name) + '</option>';}).join('');
+}
+
+function generateEmailPrompt(){
+  var sel = document.getElementById('efProspect').value;
+  var name = document.getElementById('efName').value.trim();
+  var type = document.getElementById('efType').value.trim();
+  var angle = document.getElementById('efAngle').value.trim();
+  var tone = document.getElementById('efTone').value;
+  var myName = settings.userName || '[Your name]';
+
+  if(sel){ var p = campaigns.find(function(c){return c.id===sel;}); if(p){name=p.name;type=p.type;angle=p.angle;} }
+  if(!name){alert('Enter a business name or select a prospect.');return;}
+
+  var toneInstructions = {
+    direct:'Be direct. Lead with cost comparison. No fluff.',
+    consultative:'Be consultative. Ask a diagnostic question first. Then show the solution.',
+    urgent:'Create mild urgency. Mention limited onboarding spots this month.'
+  };
+
+  var prompt = 'Write a cold email to ' + name + ', a ' + type + '.\n\n' +
+    'Context: ' + angle + '\n\n' +
+    'Product: Autoflow — AI receptionist, 24/7, books appointments, handles FAQs, English + Spanish. $599/month.\n\n' +
+    'Comparison: 3 humans = ~$9,600/mo. 5 humans = ~$16,000/mo. Autoflow = $599.\n\n' +
+    'Tone: ' + toneInstructions[tone] + '\n\n' +
+    'Requirements:\n- Subject under 8 words\n- First sentence references their pain\n- Include the $9,600 vs $599 comparison\n- Low-friction CTA\n- Sign off as "' + myName + '" from Autoflow\n- 120-160 words\n\n' +
+    'Return ONLY subject line and body. No JSON, no markdown.';
+
+  document.getElementById('emailPromptText').textContent = prompt;
+  document.getElementById('emailPromptCard').classList.remove('hidden');
+  document.getElementById('emailPromptCard').scrollIntoView({behavior:'smooth'});
+}
+
+function saveEmailToProspect(){
+  var sel = document.getElementById('efProspect').value;
+  var body = document.getElementById('emailResult').value.trim();
+  if(!body || !sel){alert('Select a prospect and paste the email.');return;}
+  var c = campaigns.find(function(x){return x.id===sel;});
+  if(c){c.emailSent=body;c.status='sent';saveCampaigns();renderAll();alert('Saved to ' + c.name);}
 }
 
 function openEdit(id){
@@ -997,20 +1000,8 @@ function saveEdit(){
     c.status = document.getElementById('editStatus').value;
     c.emailSent = document.getElementById('editEmail').value;
     c.notes = document.getElementById('editNotes').value;
-    saveCampaigns();
-    renderCampaigns();
-    updateStats();
-    closeModal();
+    saveCampaigns(); renderAll(); closeModal();
   }
-}
-
-function saveEmailToProspect(){
-  var sel = document.getElementById('efProspect').value;
-  var body = document.getElementById('emailResult').value.trim();
-  if(!body){alert('Paste the email output first.');return;}
-  if(!sel){alert('Select a prospect from the dropdown first.');return;}
-  var c = campaigns.find(function(x){return x.id===sel;});
-  if(c){c.emailSent=body;c.status='sent';saveCampaigns();renderCampaigns();updateStats();alert('Saved to '+c.name);}
 }
 
 function addSubscriber(){
@@ -1028,9 +1019,7 @@ function addSubscriber(){
     date:date||new Date().toISOString().slice(0,10), notes:notes,
     created:new Date().toISOString()
   });
-  saveSubscribers();
-  renderSubscribers();
-  updateSubStats();
+  saveSubscribers(); renderAll();
   document.getElementById('subName').value='';
   document.getElementById('subEmail').value='';
   document.getElementById('subCompany').value='';
@@ -1048,28 +1037,18 @@ function renderSubscribers(){
     var planPrice = {'Reputation Only':'$99','Full Suite':'$599','Enterprise':'Custom'}[s.plan] || '';
     return '<tr>' +
       '<td><strong style="color:var(--text);">' + esc(s.name) + '</strong></td>' +
-      '<td><a href="mailto:' + esc(s.email) + '" style="color:var(--navy-mid);text-decoration:underline;">' + esc(s.email) + '</a></td>' +
+      '<td class="mono" style="font-size:12px;"><a href="mailto:' + esc(s.email) + '" style="color:var(--navy-mid);text-decoration:underline;">' + esc(s.email) + '</a></td>' +
       '<td>' + esc(s.company) + '</td>' +
       '<td>' + esc(s.plan) + ' <span style="color:var(--faint);font-size:11px;">' + planPrice + '</span></td>' +
       '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
       '<td class="mono" style="font-size:12px;">' + esc(s.date) + '</td>' +
-      '<td style="font-size:12px;color:var(--faint);max-width:180px;">' + esc(s.notes) + '</td>' +
+      '<td style="font-size:12px;color:var(--faint);max-width:160px;">' + esc(s.notes) + '</td>' +
       '<td><button class="btn btn-sm btn-outline" onclick="openSubEdit(\'' + s.id + '\')">Edit</button></td>' +
     '</tr>';
   }).join('');
 }
 
 function saveSubscribers(){localStorage.setItem('af_subscribers', JSON.stringify(subscribers));}
-
-function updateSubStats(){
-  var active = subscribers.filter(function(s){return s.status==='active';});
-  var mrr = active.reduce(function(sum,s){
-    return sum + (s.plan==='Reputation Only'?99:s.plan==='Full Suite'?599:0);
-  },0);
-  document.getElementById('subTotal').textContent = subscribers.length;
-  document.getElementById('subMRR').textContent = '$' + mrr.toLocaleString();
-  document.getElementById('subActive').textContent = active.length;
-}
 
 function exportSubCSV(){
   if(subscribers.length===0){alert('No subscribers to export.');return;}
@@ -1085,7 +1064,7 @@ function exportSubCSV(){
 
 function clearSubs(){
   if(confirm('Delete ALL subscribers? This cannot be undone.')){
-    subscribers=[];saveSubscribers();renderSubscribers();updateSubStats();
+    subscribers=[];saveSubscribers();renderAll();
   }
 }
 
@@ -1106,16 +1085,13 @@ function saveSubEdit(){
     s.plan = document.getElementById('subEditPlan').value;
     s.status = document.getElementById('subEditStatus').value;
     s.notes = document.getElementById('subEditNotes').value;
-    saveSubscribers();
-    renderSubscribers();
-    updateSubStats();
-    closeSubModal();
+    saveSubscribers(); renderAll(); closeSubModal();
   }
 }
 
 function copyPrompt(id){
   var text = document.getElementById(id).textContent;
-  navigator.clipboard.writeText(text).then(function(){alert('Copied to clipboard. Open Claude.ai and paste.');});
+  navigator.clipboard.writeText(text).then(function(){alert('Copied!');});
 }
 function copyTemplate(btn){
   var text = btn.previousElementSibling.textContent;
@@ -1123,8 +1099,8 @@ function copyTemplate(btn){
 }
 function exportCSV(){
   if(campaigns.length===0){alert('No data to export.');return;}
-  var headers = ['Name','Type','City','Angle','Status','EmailSent','Notes','Created'];
-  var rows = campaigns.map(function(c){return [c.name,c.type,c.city,c.angle,c.status,(c.emailSent||'').replace(/\n/g,' '),(c.notes||'').replace(/\n/g,' '),c.created];});
+  var headers = ['Name','Email','Type','City','Angle','Status','Notes','Created'];
+  var rows = campaigns.map(function(c){return [c.name,c.email||'',c.type,c.city,c.angle,c.status,(c.notes||'').replace(/\n/g,' '),c.created];});
   var csv = [headers].concat(rows).map(function(r){return r.map(function(f){return '"' + String(f).replace(/"/g,'""') + '"';}).join(',');}).join('\n');
   var blob = new Blob([csv],{type:'text/csv'});
   var a = document.createElement('a');
@@ -1134,7 +1110,7 @@ function exportCSV(){
 }
 function clearAll(){
   if(confirm('Delete ALL prospects? This cannot be undone.')){
-    campaigns=[];saveCampaigns();renderCampaigns();updateStats();populateEmailSelect();
+    campaigns=[];saveCampaigns();renderAll();
   }
 }
 </script>
