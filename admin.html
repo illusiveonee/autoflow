@@ -12,9 +12,10 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
 
-.tab-content { min-height: 400px; }
-.chart-card canvas { max-height: 200px; width: 100% !important; }
-.chart-card { min-height: auto; overflow: hidden; }
+/* ─── FIX SHAKING ─── */
+.tab-content { min-height: 500px; }
+.chart-card { min-height: 260px; overflow: hidden; }
+.chart-card canvas { width: 100% !important; height: 160px !important; }
 
 #loginScreen{position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;align-items:center;justify-content:center;}
 .login-box{background:var(--surface);padding:40px;border-radius:12px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
@@ -58,7 +59,7 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:16p
 .stat-change.up{color:#059669;}
 .stat-change.down{color:var(--red);}
 
-.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;}
+.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:24px;}
 .chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
 .chart-title{font-size:14px;font-weight:700;color:var(--mid);letter-spacing:.05em;text-transform:uppercase;}
 
@@ -181,8 +182,8 @@ footer a:hover{text-decoration:underline;}
       </div>
     </div>
 
-    <!-- ─── REVENUE CHART ─── -->
-    <div class="chart-card" style="margin-bottom:24px;min-height:280px;">
+    <!-- Revenue Chart -->
+    <div class="chart-card">
       <div class="chart-header">
         <div class="chart-title">Revenue History (last 12 months)</div>
         <span style="font-size:12px;color:var(--faint);">Monthly Recurring Revenue</span>
@@ -190,8 +191,8 @@ footer a:hover{text-decoration:underline;}
       <canvas id="revenueChart" height="160"></canvas>
     </div>
 
-    <!-- ─── PROSPECT CHART ─── -->
-    <div class="chart-card" style="margin-bottom:24px;min-height:200px;">
+    <!-- Prospect Chart -->
+    <div class="chart-card">
       <div class="chart-header">
         <div class="chart-title">Prospect Discovery (last 30 days)</div>
         <span style="font-size:12px;color:var(--faint);">New prospects found</span>
@@ -199,8 +200,8 @@ footer a:hover{text-decoration:underline;}
       <canvas id="prospectChart" height="100"></canvas>
     </div>
 
-    <!-- ─── SUBSCRIPTION FEED ─── -->
-    <div class="chart-card" style="margin-bottom:24px;">
+    <!-- Subscription Feed -->
+    <div class="chart-card">
       <div class="chart-header">
         <div class="chart-title">📢 Recent Subscriptions (Live)</div>
         <span style="font-size:12px;color:var(--faint);">updates every 30s</span>
@@ -211,8 +212,8 @@ footer a:hover{text-decoration:underline;}
     </div>
 
     <div class="finder-panel">
-      <h3>🤖 Claude AI Prospect Finder</h3>
-      <p>Autonomously discovers business names, emails & contact info via Claude API</p>
+      <h3>🤖 Prospect Finder</h3>
+      <p>Generates real‑looking leads with names, ratings, and emails – instantly.</p>
       <div class="finder-grid">
         <select id="finderIndustry">
           <option value="">Select industry...</option>
@@ -221,23 +222,22 @@ footer a:hover{text-decoration:underline;}
           <option value="Auto Dealerships">Auto Dealerships</option>
           <option value="Restaurants">Restaurants</option>
           <option value="Medical Practices">Medical Practices</option>
-          <option value="Real Estate Agencies">Real Estate Agencies</option>
-          <option value="Hotels & Motels">Hotels & Motels</option>
-          <option value="Barbershops & Salons">Barbershops & Salons</option>
-          <option value="Veterinary Clinics">Veterinary Clinics</option>
-          <option value="HVAC & Plumbing">HVAC & Plumbing</option>
-          <option value="Gyms & Fitness Studios">Gyms & Fitness Studios</option>
+          <option value="Real Estate">Real Estate</option>
+          <option value="Hotels">Hotels</option>
+          <option value="Barbershops">Barbershops</option>
+          <option value="Veterinary">Veterinary</option>
+          <option value="HVAC">HVAC</option>
+          <option value="Gyms">Gyms</option>
           <option value="Chiropractors">Chiropractors</option>
-          <option value="Accounting Firms">Accounting Firms</option>
-          <option value="Insurance Agencies">Insurance Agencies</option>
-          <option value="Roofing Companies">Roofing Companies</option>
+          <option value="Accounting">Accounting</option>
+          <option value="Insurance">Insurance</option>
+          <option value="Roofing">Roofing</option>
         </select>
-        <input type="text" id="finderCity" placeholder="City, State (e.g. New York, NY)">
-        <input type="text" id="finderPain" placeholder="Pain point (e.g. lead generation)">
+        <input type="text" id="finderCity" placeholder="City, State (e.g. New York, NY)" value="Houston, TX">
         <input type="number" id="finderCount" placeholder="How many?" value="10" min="1" max="50">
       </div>
-      <button class="finder-btn" id="finderBtn" onclick="runClaudeFinder()">
-        <span>🔍</span> Find Prospects with Claude
+      <button class="finder-btn" id="finderBtn" onclick="runFinder()">
+        <span>🔍</span> Generate Prospects
       </button>
       <div id="finderError"></div>
       <div id="finderSuccess"></div>
@@ -328,7 +328,7 @@ footer a:hover{text-decoration:underline;}
 const ADMIN_PASSWORD = 'autoflow2026';
 const API_BASE = '/api';
 
-// ─── LOGIN ───
+// ─── LOGIN ──────────────────────────────────────
 function doLogin(){
   const pw = document.getElementById('adminPassword').value;
   if(pw === ADMIN_PASSWORD){
@@ -349,7 +349,7 @@ if(localStorage.getItem('af_admin_auth')==='1'){
   document.getElementById('app').style.display='block';
 }
 
-// ─── TAB SWITCH ───
+// ─── TAB SWITCH ──────────────────────────────────
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
@@ -359,11 +359,11 @@ function switchTab(name){
   if(name==='subscribers') fetchSubscribers();
 }
 
-// ─── CHARTS ───
+// ─── CHARTS ──────────────────────────────────────
 let revChart, prospectChart;
 
 function initCharts(stats){
-  // Revenue chart (bar)
+  // Revenue
   const ctxRev = document.getElementById('revenueChart').getContext('2d');
   if(revChart) revChart.destroy();
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -392,7 +392,7 @@ function initCharts(stats){
     }
   });
 
-  // Prospect chart (line)
+  // Prospect
   const ctxPro = document.getElementById('prospectChart').getContext('2d');
   if(prospectChart) prospectChart.destroy();
   const hist = stats?.prospectHistory || Array.from({length:30}, () => ({date:'', count:0}));
@@ -425,7 +425,7 @@ function initCharts(stats){
   });
 }
 
-// ─── SUBSCRIPTION FEED ───
+// ─── SUBSCRIPTION FEED ──────────────────────────
 function renderSubscriptionFeed(subscribers){
   const feed = document.getElementById('subscriptionFeed');
   if(!subscribers || subscribers.length===0){
@@ -452,11 +452,11 @@ function renderSubscriptionFeed(subscribers){
   }).join('');
 }
 
-// ─── FETCH DATA ───
+// ─── FETCH DATA ──────────────────────────────────
 async function fetchStats(){
   try {
     const res = await fetch(API_BASE+'/stats');
-    if(!res.ok) throw new Error('Failed to fetch stats');
+    if(!res.ok) throw new Error('Stats fetch failed');
     const data = await res.json();
     document.getElementById('statMrr').textContent = '$'+data.mrr.toLocaleString();
     document.getElementById('statSubs').textContent = data.subscribers;
@@ -475,10 +475,7 @@ async function fetchStats(){
 async function fetchProspects(){
   try {
     const res = await fetch(API_BASE+'/prospects');
-    if(!res.ok) {
-      const text = await res.text();
-      throw new Error(`HTTP ${res.status}: ${text}`);
-    }
+    if(!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
     renderProspects(data.prospects || []);
   } catch(e){
@@ -490,7 +487,7 @@ async function fetchProspects(){
 function renderProspects(prospects){
   const tbody = document.getElementById('prospectsTableBody');
   if(!prospects || prospects.length===0){
-    tbody.innerHTML='<tr><td colspan="6" class="empty-state">No prospects yet. Use the Claude AI Finder to discover leads.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="6" class="empty-state">No prospects yet. Generate some using the Finder above.</td></tr>';
     return;
   }
   tbody.innerHTML = prospects.map((p,i)=>`
@@ -543,11 +540,10 @@ function renderSubscribers(subs){
   `).join('');
 }
 
-// ─── CLAUDE FINDER ───
-async function runClaudeFinder(){
+// ─── FINDER (NEW) ──────────────────────────────
+async function runFinder(){
   const industry = document.getElementById('finderIndustry').value;
   const city = document.getElementById('finderCity').value.trim();
-  const pain = document.getElementById('finderPain').value.trim();
   const count = parseInt(document.getElementById('finderCount').value)||10;
   const btn = document.getElementById('finderBtn');
   const err = document.getElementById('finderError');
@@ -556,28 +552,28 @@ async function runClaudeFinder(){
   err.style.display='none';succ.style.display='none';
   if(!industry||!city){err.textContent='Please select an industry and enter a city.';err.style.display='block';return;}
 
-  btn.disabled=true;btn.innerHTML='<span>⏳</span> Finding prospects...';
+  btn.disabled=true;btn.innerHTML='<span>⏳</span> Generating...';
   try{
     const res = await fetch(API_BASE+'/prospects',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({industry,city,pain,count})
+      body:JSON.stringify({industry,city,count})
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Unknown error');
-    succ.textContent = `Found ${data.count} prospects! Total updated.`;
+    succ.textContent = `✅ Generated ${data.count} prospects! (${data.usedClaude ? 'Claude' : 'Random fallback'})`;
     succ.style.display='block';
-    showToast(`Found ${data.count} new prospects`);
+    showToast(`Added ${data.count} prospects`);
     fetchProspects();
     fetchStats();
   }catch(e){
-    err.innerHTML = `<b>Error:</b> ${escapeHtml(e.message)}<br><small>Check Vercel logs and ensure ANTHROPIC_API_KEY is set.</small>`;
+    err.innerHTML = `<b>Error:</b> ${escapeHtml(e.message)}<br><small>Check Vercel logs if issue persists.</small>`;
     err.style.display='block';
   }
-  btn.disabled=false;btn.innerHTML='<span>🔍</span> Find Prospects with Claude';
+  btn.disabled=false;btn.innerHTML='<span>🔍</span> Generate Prospects';
 }
 
-// ─── ADD PROSPECT (manually) ───
+// ─── ADD PROSPECT (manual) ──────────────────────
 function openAddModal(){document.getElementById('addModal').classList.add('show');}
 function closeAddModal(){document.getElementById('addModal').classList.remove('show');}
 async function saveProspect(){
@@ -606,7 +602,7 @@ async function saveProspect(){
   }
 }
 
-// ─── CLEAR PROSPECTS ───
+// ─── CLEAR ──────────────────────────────────────
 async function clearAllProspects(){
   if(!confirm('Clear all prospects? This cannot be undone.')) return;
   try {
@@ -619,7 +615,7 @@ async function clearAllProspects(){
   }
 }
 
-// ─── EXPORT CSV ───
+// ─── EXPORT CSV ─────────────────────────────────
 async function exportCSV(){
   try {
     const res = await fetch(API_BASE+'/prospects');
@@ -638,7 +634,7 @@ async function exportCSV(){
   } catch(e){alert('Export error: '+e.message);}
 }
 
-// ─── HELPERS ───
+// ─── HELPERS ──────────────────────────────────
 function escapeHtml(t){return(t||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function copyEmail(email){if(!email)return;navigator.clipboard.writeText(email).then(()=>showToast('Email copied'));}
 function showToast(text){
@@ -648,7 +644,7 @@ function showToast(text){
   setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-// ─── INIT ───
+// ─── INIT ──────────────────────────────────────
 async function initDashboard(){
   const stats = await fetchStats();
   if(stats) initCharts(stats);
