@@ -64,7 +64,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
   }
 
-  // 🔥 PROMPT – forces real emails, plus fallback instructions
+  // 🔥 PROMPT – forces real emails, fallback if missing
   const prompt = `You are a B2B lead generation researcher. Find ${count} real, verifiable ${industry} businesses in ${city}.
 
 IMPORTANT: 
@@ -170,7 +170,7 @@ Example:
   }
 }
 
-// ─── Helper ────────────────────────────────────
+// ─── Helper to recalc all stats ──────────────
 async function updateStats() {
   const subscribers = (await kv.get('subscribers')) || [];
   const prospects = (await kv.get('prospects')) || [];
