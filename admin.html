@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoflow — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#F7F6F2;--surface:#FFFFFF;--navy:#0F2744;--navy-mid:#1A3A5C;--navy-light:#E8EEF5;--text:#1A1A1A;--mid:#4A5568;--faint:#94A3B8;--line:#E2DDD6;--danger:#DC2626;--success:#059669;--warning:#D97706;--purple:#7C3AED;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.55;font-size:14.5px;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;}
+nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--line);padding:0 24px;}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:15px;height:15px;fillfill:#fff;}
+.logo-text{font-family:'DM Sans',serif;font-size:18px;font-weight:600;}
+.back-link{font-size:13px;color:var(--mid);font-weight:500;}
+.section{padding:32px 0;border-top:1px solid var(--line);}.section:first-of-type{border-top:none;}
+.sec-title{font-size:22px;font-weight:600;margin-bottom:6px;}
+.sec-sub{color:var(--mid);font-size:14px;margin-bottom:20px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+@media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr;}}
+.stat-box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;}
+.stat-box::before{content:'';display:block;height:3px;background:var(--navy);margin:-20px -20px 12px;border-radius:3px 3px 0 0;}
+.stat-box.revenue::before{background:var(--success);}
+.stat-box.prospects::before{background:var(--warning);}
+.stat-box.emails::before{background:var(--purple);}
+.stat-num{font-size:32px;font-weight:600;color:var(--navy);}
+.stat-label{font-size:12px;color:var(--faint);margin-top:4px;}
+.stat-change{font-size:11px;color:var(--success);margin-top:6px;font-weight:600;}
+.chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;}
+@media(max-width:860px){.chart-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;}
+.chart-wrap{height:220px;position:relative;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:16px;}
+.card-title{font-size:18px;font-weight:600;margin-bottom:16px;}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:10px 14px;background:#FAFAF8;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--faint);border-bottom:1px solid var(--line);}
+td{padding:12px 14px;border-bottom:1px solid var(--line);color:var(--mid);}
+tr:hover td{background:#FAFAF8;}
+tr:last-child td{border-bottom:none;}
+.status{display:inline-flex;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;}
+.status-active{background:#ECFDF5;color:var(--success);}
+.status-paused{background:#FFFBEB;color:var(--warning);}
+.status-cancelled{background:#FEF2F2;color:var(--danger);}
+.status-pending{background:#FFFBEB;color:var(--warning);}
+.status-sent{background:var(--navy-light);color:var(--navy-mid);}
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:5px;font-size:14px;background:var(--bg);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+.btn{padding:9px 16px;border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;border:2px solid var(--navy);background:var(--navy);color:#fff;font-family:'DM Sans',sans-serif;}
+.btn:hover{opacity:.9;}
+.btn-outline{background:transparent;color:var(--navy);}
+.btn-outline:hover{background:var(--navy);color:#fff;}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-danger{border-color:var(--danger);background:var(--danger);}
+.btn-success{border-color:var(--success);background:var(--success);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.hidden{display:none !important;}
+.empty{text-align:center;padding:40px 20px;color:var(--faint);font-size:13px;}
+.flex{display:flex;gap:8px;flex-wrap:wrap;}
+.mini-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--line);margin-bottom:8px;}
+.mini-name{font-weight:600;font-size:13px;}
+.mini-meta{font-size:11px;color:var(--faint);}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--navy);color:#fff;padding:10px 18px;border-radius:6px;font-size:13px;font-weight:600;transform:translateY(100px);opacity:0;transition:all .3s;z-index:300;}
+.toast.show{transform:translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2a10 10 0 1 0 10 10" stroke="#fff" stroke-width="2" fill="none"/></svg>
+      </div>
+      <div class="logo-text">Autoflow Dashboard</div>
+    </div>
+    <a href="index.html" class="back-link">Back to site</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <div class="section">
+    <div class="stats-row">
+      <div class="stat-box revenue">
+        <div class="stat-num" id="statMRR">$0</div>
+        <div class="stat-label">Monthly Recurring Revenue</div>
+        <div class="stat-change" id="statMRRChange">0 active</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statActive">0</div>
+        <div class="stat-label">Active Subscribers</div>
+        <div class="stat-change" id="statActiveChange">0 total</div>
+      </div>
+      <div class="stat-box prospects">
+        <div class="stat-num" id="statProspects">0</div>
+        <div class="stat-label">Prospects Found</div>
+        <div class="stat-change" id="statProspectsChange">0 contacted</div>
+      </div>
+      <div class="stat-box emails">
+        <div class="stat-num" id="statEmails">0</div>
+        <div class="stat-label">Emails Sent</div>
+        <div class="stat-change" id="statEmailsChange">0 replies</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-wrap"><canvas id="planChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-title">Subscribers</div>
+    <div class="sec-sub">Current paying clients and their plans.</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Plan</th><th>Status</th><th>Started</th></tr></thead>
+          <tbody id="subTable"></tbody>
+        </table>
+      </div>
+      <div id="subEmpty" class="empty hidden">No subscribers yet.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Add New Subscriber</div>
+      <div class="form-row">
+        <div class="fg"><label>Name</label><input type="text" id="subName" placeholder="Dr. Sarah Patel"></div>
+        <div class="fg"><label>Email</label><input type="email" id="subEmail" placeholder="sarah@patel.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Company</label><input type="text" id="subCompany" placeholder="Patel Dental"></div>
+        <div class="fg"><label>Plan</label>
+          <select id="subPlan">
+            <option value="Reputation Only">Reputation Only — $99/mo</option>
+            <option value="Full Suite">Full Suite — $599/mo</option>
+            <option value="Enterprise">Enterprise — Custom</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Status</label>
+          <select id="subStatus"><option value="active">Active</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option></select>
+        </div>
+        <div class="fg"><label>Start Date</label><input type="date" id="subDate"></div>
+      </div>
+      <button class="btn" onclick="addSubscriber()">Add Subscriber</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-title">Prospects</div>
+    <div class="sec-sub">Find leads and track outreach.</div>
+    <div class="card">
+      <div class="card-title">Claude Prospect Finder</div>
+      <div class="form-row">
+        <div class="fg"><label>Industry</label>
+          <select id="pfIndustry">
+            <option value="law">Law Firms</option><option value="dental">Dental Offices</option><option value="medical">Medical Practices</option>
+            <option value="hvac">HVAC / Plumbing</option><option value="auto">Auto Dealerships</option><option value="re">Real Estate</option>
+            <option value="accounting">Accounting</option><option value="insurance">Insurance</option><option value="vet">Veterinary</option>
+            <option value="chiro">Chiropractors</option><option value="spa">Spas & MedSpas</option><option value="hotel">Hotels</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="fg"><label>City</label><input type="text" id="pfCity" placeholder="Houston TX" value="Houston TX"></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Pain Signal</label>
+          <select id="pfPain">
+            <option value="missed">Missed calls</option><option value="reviews">Bad reviews</option>
+            <option value="hours">No after-hours</option><option value="growth">Growing fast</option><option value="cost">High staffing costs</option>
+          </select>
+        </div>
+        <div class="fg"><label>Count</label>
+          <select id="pfCount"><option value="10">10</option><option value="20" selected>20</option><option value="50">50</option></select>
+        </div>
+      </div>
+      <div class="flex">
+        <button class="btn" id="runClaudeBtn" onclick="runClaudeFinder()"><span id="btnText">Run Claude Finder</span></button>
+        <button class="btn btn-outline btn-sm" onclick="generateProspectPrompt()">Manual Prompt</button>
+      </div>
+      <div id="finderStatus" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card hidden" id="claudeResultsCard">
+      <div class="card-title">Claude Found These Prospects</div>
+      <div id="claudeResultsList"></div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="addClaudeResultsToCampaigns()">Add All to Campaigns</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('claudeResultsCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="prospectPromptCard">
+      <div class="card-title">Manual Claude Prompt</div>
+      <div style="background:#0F172A;border-radius:6px;padding:12px;color:#E2E8F0;font-family:monospace;font-size:11px;line-height:1.6;position:relative;">
+        <div id="prospectPromptText" style="white-space:pre-wrap;"></div>
+        <button style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);color:#fff;border:none;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;" onclick="copyPrompt()">Copy</button>
+      </div>
+      <div class="fg" style="margin-top:10px;">
+        <label>Paste Claude JSON output here</label>
+        <textarea id="prospectResult" rows="3" placeholder='[{"name":"...","email":"..."}]'></textarea>
+      </div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="parseProspects()">Load into Campaigns</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('prospectPromptCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Campaign Tracker</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Business</th><th>Email</th><th>Type</th><th>City</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="campaignTable"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="empty">No prospects yet. Use the finder above.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Add Prospect Manually</div>
+      <div class="form-row">
+        <div class="fg"><label>Business Name</label><input type="text" id="manName" placeholder="River Oaks Dental"></div>
+        <div class="fg"><label>Email</label><input type="text" id="manEmail" placeholder="info@riveroaksdental.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Type</label><input type="text" id="manType" placeholder="Dental Office"></div>
+        <div class="fg"><label>City</label><input type="text" id="manCity" placeholder="Houston TX"></div>
+      </div>
+      <button class="btn" onclick="addManual()">Add to Campaign</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var campaigns=JSON.parse(localStorage.getItem('af_campaigns')||'[]');
+var subscribers=JSON.parse(localStorage.getItem('af_subscribers')||'[]');
+var claudeResults=[];
+var revenueChart=null,planChart=null;
+
+function loadDemo(){
+  if(subscribers.length===0){
+    subscribers=[
+      {id:'s1',name:'Dr. Ravi Patel',email:'ravi@pateldental.com',company:'Patel Dental Group',plan:'Full Suite',status:'active',date:'2026-01-15'},
+      {id:'s2',name:'Sarah Mitchell',email:'sarah@mitchelllaw.com',company:'Mitchell Law',plan:'Reputation Only',status:'active',date:'2026-02-03'},
+      {id:'s3',name:'James Chen',email:'james@apexauto.com',company:'Apex Auto',plan:'Full Suite',status:'active',date:'2026-03-12'},
+      {id:'s4',name:'Maria Rodriguez',email:'maria@sunrisemed.com',company:'Sunrise Medical',plan:'Enterprise',status:'active',date:'2025-11-08'},
+      {id:'s5',name:'David Kim',email:'david@kimsrestaurant.com',company:"Kim's Restaurant",plan:'Reputation Only',status:'cancelled',date:'2026-04-20'}
+    ];
+    saveSubs();
+  }
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  loadDemo();
+  document.getElementById('subDate').value=new Date().toISOString().slice(0,10);
+  renderAll();initCharts();
+});
+
+function renderAll(){renderCampaigns();renderSubs();updateStats();updateCharts();}
+
+function updateStats(){
+  var active=subscribers.filter(function(s){return s.status==='active';});
+  var mrr=active.reduce(function(sum,s){return sum+(s.plan==='Reputation Only'?99:s.plan==='Full Suite'?599:0);},0);
+  var emailed=campaigns.filter(function(c){return c.status==='sent'||c.status==='replied';}).length;
+  var replies=campaigns.filter(function(c){return c.status==='replied';}).length;
+  document.getElementById('statMRR').textContent='$'+mrr.toLocaleString();
+  document.getElementById('statMRRChange').textContent=active.length+' active';
+  document.getElementById('statActive').textContent=active.length;
+  document.getElementById('statActiveChange').textContent=subscribers.length+' total';
+  document.getElementById('statProspects').textContent=campaigns.length;
+  document.getElementById('statProspectsChange').textContent=emailed+' contacted';
+  document.getElementById('statEmails').textContent=emailed;
+  document.getElementById('statEmailsChange').textContent=replies+' replies';
+}
+
+function initCharts(){
+  var rc=document.getElementById('revenueChart').getContext('2d');
+  revenueChart=new Chart(rc,{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'MRR',data:[0,0,0,0,0,0],borderColor:'#0F2744',backgroundColor:'rgba(15,39,68,0.08)',fill:true,tension:0.4,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#E2DDD6'},ticks:{callback:function(v){return '$'+v;}}},x:{grid:{display:false}}}}});
+  var pc=document.getElementById('planChart').getContext('2d');
+  planChart=new Chart(pc,{type:'doughnut',data:{labels:['Reputation','Full Suite','Enterprise'],datasets:[{data:[0,0,0],backgroundColor:['#E8EEF5','#0F2744','#7C3AED'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}}}});
+}
+
+function updateCharts(){
+  if(!revenueChart||!planChart)return;
+  var now=new Date(),mrrData=[],labels=[],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for(var i=5;i>=0;i--){var d=new Date(now.getFullYear(),now.getMonth()-i,1);var m=subscribers.filter(function(s){if(s.status!=='active')return false;var sd=new Date(s.date);return sd.getFullYear()<d.getFullYear()||(sd.getFullYear()===d.getFullYear()&&sd.getMonth()<=d.getMonth());}).reduce(function(sum,s){return sum+(s.plan==='Reputation Only'?99:s.plan==='Full Suite'?599:0);},0);mrrData.push(m);labels.push(months[d.getMonth()]);}
+  revenueChart.data.labels=labels;revenueChart.data.datasets[0].data=mrrData;revenueChart.update();
+  var r=subscribers.filter(function(s){return s.plan==='Reputation Only'&&s.status==='active';}).length;
+  var f=subscribers.filter(function(s){return s.plan==='Full Suite'&&s.status==='active';}).length;
+  var e=subscribers.filter(function(s){return s.plan==='Enterprise'&&s.status==='active';}).length;
+  planChart.data.datasets[0].data=[r,f,e];planChart.update();
+}
+
+function runClaudeFinder(){
+  var industry=document.getElementById('pfIndustry').value;
+  var city=document.getElementById('pfCity').value.trim()||'Houston TX';
+  var pain=document.getElementById('pfPain').value;
+  var count=document.getElementById('pfCount').value;
+  var btn=document.getElementById('runClaudeBtn');
+  var btnText=document.getElementById('btnText');
+  var status=document.getElementById('finderStatus');
+  btn.disabled=true;btnText.innerHTML='<span class="spinner"></span> Finding...';
+  status.innerHTML='<span style="color:var(--faint);">Calling Claude...</span>';
+  claudeResults=[];
+  fetch('/api/prospects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({industry:industry,city:city,pain:pain,count:parseInt(count)})})
+  .then(function(res){return res.json();})
+  .then(function(data){
+    btn.disabled=false;btnText.innerHTML='Run Claude Finder';
+    if(data.error){status.innerHTML='<span style="color:var(--danger);">Error: '+esc(data.error)+'</span>';showToast('API error','error');return;}
+    if(!data.prospects||data.prospects.length===0){status.innerHTML='<span style="color:var(--warning);">No prospects found.</span>';return;}
+    claudeResults=data.prospects.map(function(p){return{name:p.name||'Unknown',email:p.email||'',type:p.type||'Business',angle:p.angle||''};});
+    var html='';claudeResults.forEach(function(p){html+='<div class="mini-item"><div><div class="mini-name">'+esc(p.name)+'</div><div class="mini-meta">'+esc(p.email)+' &middot; '+esc(p.type)+'</div></div></div>';});
+    document.getElementById('claudeResultsList').innerHTML=html;
+    document.getElementById('claudeResultsCard').classList.remove('hidden');
+    status.innerHTML='<span style="color:var(--success);">Found '+claudeResults.length+' prospects</span>';
+    showToast('Found '+claudeResults.length+' prospects');
+  })
+  .catch(function(err){
+    btn.disabled=false;btnText.innerHTML='Run Claude Finder';
+    status.innerHTML='<span style="color:var(--danger);">Error. Try Manual Prompt.</span>';
+    showToast('API error - use Manual Prompt','error');
+  });
+}
+
+function addClaudeResultsToCampaigns(){
+  if(claudeResults.length===0)return;
+  var city=document.getElementById('pfCity').value.trim()||'Houston TX';
+  claudeResults.forEach(function(item){
+    campaigns.push({id:'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:item.name,email:item.email||'',type:item.type||'Business',city:city,angle:item.angle||'',status:'pending',created:new Date().toISOString()});
+  });
+  saveCampaigns();renderAll();
+  document.getElementById('claudeResultsCard').classList.add('hidden');
+  showToast('Added '+claudeResults.length+' to campaigns');
+  claudeResults=[];
+}
+
+function generateProspectPrompt(){
+  var industry=document.getElementById('pfIndustry').value;
+  var city=document.getElementById('pfCity').value.trim()||'Houston TX';
+  var pain=document.getElementById('pfPain').value;
+  var count=document.getElementById('pfCount').value;
+  var verticals={law:'law firms',dental:'dental offices',medical:'medical practices',hvac:'HVAC and plumbing',auto:'auto dealerships',re:'real estate agencies',accounting:'accounting firms',insurance:'insurance agencies',vet:'veterinary clinics',chiro:'chiropractors',spa:'spas and medspas',hotel:'hotels and motels',general:'small businesses'};
+  var pains={missed:'no one answers the phone after hours',reviews:'bad reviews mention rude front desk',hours:'business closes at 5 PM but customers call at 6-8 PM',growth:'hiring multiple front-desk staff but still missing calls',cost:'currently employ 3-5 receptionists, high staffing costs'};
+  var prompt='You are a lead researcher for Autoflow, an AI receptionist company.\\n\\nFind '+count+' real '+verticals[industry]+' in '+city+' that likely need a 24/7 AI receptionist.\\n\\nFocus on: '+pains[pain]+'.\\n\\nFor each, provide ONLY name and email (best guess like info@company.com).\\nReturn ONLY a valid JSON array. Example: [{\\"name\\":\\"River Oaks Dental\\",\\"email\\":\\"info@riveroaksdental.com\\"}]\\n\\nMake entries realistic and specific to '+city+'.';
+  document.getElementById('prospectPromptText').textContent=prompt;
+  document.getElementById('prospectPromptCard').classList.remove('hidden');
+}
+
+function copyPrompt(){
+  var text=document.getElementById('prospectPromptText').textContent;
+  navigator.clipboard.writeText(text).then(function(){showToast('Copied!');});
+}
+
+function parseProspects(){
+  var raw=document.getElementById('prospectResult').value.trim();
+  if(!raw){showToast('Paste JSON first','warn');return;}
+  try{var arr=JSON.parse(raw);if(!Array.isArray(arr))throw new Error('Expected array');
+  var city=document.getElementById('pfCity').value.trim()||'Houston TX';
+  arr.forEach(function(item){campaigns.push({id:'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:item.name||'Unknown',email:item.email||'',type:item.type||'Business',city:city,angle:item.angle||'',status:'pending',created:new Date().toISOString()});});
+  saveCampaigns();renderAll();showToast('Added '+arr.length+' prospects');document.getElementById('prospectResult').value='';
+  }catch(e){showToast('Invalid JSON: '+e.message,'error');}
+}
+
+function addManual(){
+  var name=document.getElementById('manName').value.trim();
+  var email=document.getElementById('manEmail').value.trim();
+  var type=document.getElementById('manType').value.trim();
+  var city=document.getElementById('manCity').value.trim();
+  if(!name){showToast('Business name required','warn');return;}
+  campaigns.push({id:'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:name,email:email,type:type||'Business',city:city||'Unknown',status:'pending',created:new Date().toISOString()});
+  saveCampaigns();renderAll();
+  document.getElementById('manName').value='';document.getElementById('manEmail').value='';document.getElementById('manType').value='';document.getElementById('manCity').value='';
+  showToast('Added to campaign');
+}
+
+function renderCampaigns(){
+  var tbody=document.getElementById('campaignTable');
+  var empty=document.getElementById('emptyState');
+  if(campaigns.length===0){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=campaigns.map(function(c){
+    var sc='status-'+c.status;
+    var st={pending:'Pending',sent:'Sent',replied:'Replied',booked:'Booked',closed:'Closed'}[c.status]||c.status;
+    return '<tr><td><strong>'+esc(c.name)+'</strong></td><td>'+esc(c.email||'—')+'</td><td>'+esc(c.type)+'</td><td>'+esc(c.city)+'</td><td><span class="status '+sc+'">'+st+'</span></td><td><button class="btn btn-sm btn-outline" onclick="delCampaign(\\''+c.id+'\\')">Delete</button></td></tr>';
+  }).join('');
+}
+
+function delCampaign(id){campaigns=campaigns.filter(function(c){return c.id!==id;});saveCampaigns();renderAll();showToast('Deleted');}
+
+function esc(s){return(s||'').replace(/[&<>\"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+function saveCampaigns(){localStorage.setItem('af_campaigns',JSON.stringify(campaigns));}
+
+function addSubscriber(){
+  var name=document.getElementById('subName').value.trim();
+  var email=document.getElementById('subEmail').value.trim();
+  var company=document.getElementById('subCompany').value.trim();
+  var plan=document.getElementById('subPlan').value;
+  var status=document.getElementById('subStatus').value;
+  var date=document.getElementById('subDate').value;
+  if(!name||!email){showToast('Name and email required','warn');return;}
+  subscribers.push({id:'s_'+Date.now(),name:name,email:email,company:company||'—',plan:plan,status:status,date:date||new Date().toISOString().slice(0,10)});
+  saveSubs();renderAll();
+  document.getElementById('subName').value='';document.getElementById('subEmail').value='';document.getElementById('subCompany').value='';
+  showToast('Subscriber added');
+}
+
+function renderSubs(){
+  var tbody=document.getElementById('subTable');
+  var empty=document.getElementById('subEmpty');
+  if(subscribers.length===0){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=subscribers.map(function(s){
+    var sc='status-'+s.status;
+    var st={active:'Active',paused:'Paused',cancelled:'Cancelled'}[s.status]||s.status;
+    var pp={'Reputation Only':'$99','Full Suite':'$599','Enterprise':'Custom'}[s.plan]||'';
+    return '<tr><td><strong>'+esc(s.name)+'</strong></td><td>'+esc(s.email)+'</td><td>'+esc(s.company)+'</td><td>'+esc(s.plan)+' <span style="color:var(--faint);font-size:11px;">'+pp+'</span></td><td><span class="status '+sc+'">'+st+'</span></td><td>'+esc(s.date)+'</td></tr>';
+  }).join('');
+}
+
+function saveSubs(){localStorage.setItem('af_subscribers',JSON.stringify(subscribers));}
+
+function showToast(msg,type){
+  type=type||'info';
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
+}
+</script>
+</body>
+</html>
