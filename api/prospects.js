@@ -7,25 +7,6 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-function extractJSON(text) {
-  // Try to find JSON array in the response
-  text = text.trim();
-  
-  // Remove markdown code fences
-  text = text.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-  
-  // Find the first [ and last ]
-  const start = text.indexOf('[');
-  const end = text.lastIndexOf(']');
-  
-  if (start === -1 || end === -1 || end <= start) {
-    throw new Error('No JSON array found in response');
-  }
-  
-  const jsonStr = text.substring(start, end + 1);
-  return JSON.parse(jsonStr);
-}
-
 export default async function handler(req, res) {
   Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -84,24 +65,20 @@ export default async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not set in Vercel env' });
 
-  let prospects = [];
-
   try {
-    const prompt = `You are a B2B sales researcher for Autoflow, an AI receptionist and reputation management service for small businesses in the US.
+    const prompt = `Find ${count} realistic ${industry} businesses in ${city} with owner names and emails.
 
-Find ${count} realistic ${industry} businesses in ${city} that would benefit from an AI receptionist.
+Return ONLY a JSON array. Each object must have exactly these fields:
+- "name": business name with owner name (e.g. "Michael G. Berz Insurance" or "Smith & Associates")
+- "email": realistic owner email (e.g. "michael@berzinsurance.com", "info@smithlaw.com")
+- "city": "${city}"
+- "industry": "${industry}"
+- "pain": number 1-100 (higher = more desperate for AI receptionist)
+- "rating": number 1.0-5.0 (estimated Google rating)
+- "notes": one sentence why they need AI receptionist
 
-For each business return ONLY these fields:
-- name: real-sounding business name with owner name if applicable (e.g. "Michael G. Berz" or "Smith & Associates Law Firm")
-- email: realistic owner/manager email (e.g. owner@businessname.com, info@businessname.com, or firstname@businessname.com)
-- city: "${city}"
-- industry: "${industry}"
-- pain: integer 1-100 (higher = more desperate for AI receptionist / missing calls / bad reviews)
-- rating: estimated Google review rating 1.0-5.0
-- notes: one sentence explaining exactly why they need AI receptionist
-
-Respond ONLY with a valid JSON array. No markdown, no explanation, no code fences. Example:
-[{"name":"Smith Dental","email":"drsmith@smithdental.com","city":"${city}","industry":"${industry}","pain":75,"rating":3.8,"notes":"Missing after-hours calls and has 3 unanswered negative reviews"}]`;
+NO markdown. NO explanation. ONLY the JSON array. Example:
+[{"name":"Berz Insurance Agency","email":"michael@berzinsurance.com","city":"${city}","industry":"${industry}","pain":75,"rating":3.8,"notes":"Missing after-hours calls and has unanswered negative reviews"}]`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -112,7 +89,7 @@ Respond ONLY with a valid JSON array. No markdown, no explanation, no code fence
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 3000,
+        max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -125,45 +102,99 @@ Respond ONLY with a valid JSON array. No markdown, no explanation, no code fence
     const data = await response.json();
     const content = data.content?.[0]?.text || '';
     
-    console.log('Claude raw response:', content.substring(0, 500));
-    
-    const parsed = extractJSON(content);
-    if (!Array.isArray(parsed)) throw new Error('Claude did not return an array');
+    console.log('Raw Claude response:', content.substring(0, 800));
 
-    prospects = parsed.map(p => ({
-      name: String(p.name || 'Unknown Business'),
-      email: String(p.email || ''),
-      phone: String(p.phone || ''),
+    // Extract JSON array - find first [ and last ]
+    let jsonStr = '';
+    let depth = 0;
+    let inString = false;
+    let escapeNext = false;
+    let startIdx = -1;
+    
+    for (let i = 0; i < content.length; i++) {
+      const char = content[i];
+      
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+      if (char === '\\') {
+        escapeNext = true;
+        continue;
+      }
+      if (char === '"' && !escapeNext) {
+        inString = !inString;
+        continue;
+      }
+      if (!inString) {
+        if (char === '[') {
+          if (depth === 0) startIdx = i;
+          depth++;
+        } else if (char === ']') {
+          depth--;
+          if (depth === 0 && startIdx !== -1) {
+            jsonStr = content.substring(startIdx, i + 1);
+            break;
+          }
+        }
+      }
+    }
+    
+    if (!jsonStr) {
+      throw new Error('Could not find valid JSON array in response');
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch (parseErr) {
+      // Try cleaning up common issues
+      jsonStr = jsonStr.replace(/,\s*]/g, ']').replace(/,\s*}/g, '}');
+      parsed = JSON.parse(jsonStr);
+    }
+
+    if (!Array.isArray(parsed)) {
+      throw new Error('Parsed data is not an array');
+    }
+
+    const prospects = parsed.map((p, idx) => ({
+      name: String(p.name || p.business_name || `Business ${idx + 1}`),
+      email: String(p.email || p.contact_email || ''),
+      phone: String(p.phone || p.phone_number || ''),
       city: String(p.city || city),
       industry: String(p.industry || industry),
       pain: Math.min(100, Math.max(1, parseInt(p.pain) || 50)),
       rating: Math.min(5, Math.max(1, parseFloat(p.rating) || 3.5)),
-      notes: String(p.notes || ''),
+      notes: String(p.notes || p.description || ''),
       added: new Date().toISOString(),
-    }));
+    })).filter(p => p.name && p.email && p.email.includes('@'));
 
-  } catch (e) {
-    console.error('Claude search failed:', e.message);
-    return res.status(500).json({ error: `Claude search failed: ${e.message}` });
-  }
+    if (prospects.length === 0) {
+      throw new Error('Claude returned data but no valid prospects with emails');
+    }
 
-  try {
+    // Save to KV
     const existing = (await kv.get('prospects')) || [];
-    const existingEmails = new Set(existing.map(p => p.email.toLowerCase()).filter(e => e));
-    const fresh = prospects.filter(p => p.email && !existingEmails.has(p.email.toLowerCase()));
-    
-    // Also dedupe by name within the same city
+    const existingEmails = new Set(existing.map(p => p.email.toLowerCase()));
     const existingNames = new Set(existing.map(p => (p.name + '|' + p.city).toLowerCase()));
-    const freshDeduped = fresh.filter(p => !existingNames.has((p.name + '|' + p.city).toLowerCase()));
     
-    await kv.set('prospects', [...existing, ...freshDeduped]);
-    await updateStats();
-    return res.status(200).json({
-      prospects: freshDeduped,
-      count: freshDeduped.length,
-      skipped: prospects.length - freshDeduped.length,
+    const fresh = prospects.filter(p => {
+      const emailNew = !existingEmails.has(p.email.toLowerCase());
+      const nameNew = !existingNames.has((p.name + '|' + p.city).toLowerCase());
+      return emailNew && nameNew;
     });
+
+    await kv.set('prospects', [...existing, ...fresh]);
+    await updateStats();
+
+    return res.status(200).json({
+      prospects: fresh,
+      count: fresh.length,
+      skipped: prospects.length - fresh.length,
+    });
+
   } catch (e) {
-    return res.status(500).json({ error: 'KV save failed' });
+    console.error('Prospect search failed:', e.message);
+    return res.status(500).json({ error: e.message });
   }
 }
