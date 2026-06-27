@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autoflow — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f5f0;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #6b7280;
+      --border: #e5e5e0;
+      --accent: #0d9488;
+      --accent-light: #ccfbf1;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --success: #22c55e;
+      --success-light: #dcfce7;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text);
+    }
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-size: 14px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--bg); }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { background: #0f766e; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .tabs {
+      display: flex;
+      gap: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .tab {
+      padding: 12px 4px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+    .tab:hover { color: var(--text); }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .stat-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .stat-bar-fill.accent { background: var(--accent); }
+    .stat-bar-fill.danger { background: var(--danger); }
+    .stat-bar-fill.warning { background: var(--warning); }
+    .chart-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .chart-container {
+      position: relative;
+      height: 260px;
+    }
+    .finder-panel {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      color: white;
+    }
+    .finder-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .finder-subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+    .finder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .finder-input {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: white;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+    }
+    .finder-input::placeholder { color: #64748b; }
+    .finder-input:focus { border-color: var(--accent); }
+    .finder-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .finder-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .finder-btn:hover { background: #0f766e; }
+    .finder-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .finder-status {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .finder-status.show { display: flex; }
+    .finder-status.success { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .finder-status.error { background: rgba(239,68,68,0.15); color: #f87171; }
+    .finder-status.info { background: rgba(14,165,233,0.15); color: #38bdf8; }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .table-wrap {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-title { font-size: 15px; font-weight: 600; }
+    .table-actions { display: flex; gap: 8px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody tr:hover { background: #fafaf9; }
+    tbody tr:last-child td { border-bottom: none; }
+    .business-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .business-name {
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .business-type {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .rating-star { color: var(--warning); }
+    .pain-score {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .pain-low { background: var(--success-light); color: #166534; }
+    .pain-med { background: var(--warning-light); color: #92400e; }
+    .pain-high { background: var(--danger-light); color: #991b1b; }
+    .email-cell {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .email-cell a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .email-cell a:hover { text-decoration: underline; }
+    .email-missing {
+      color: var(--text-secondary);
+      font-style: italic;
+      font-size: 12px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-prospect { background: var(--accent-light); color: #115e59; }
+    .status-contacted { background: var(--warning-light); color: #92400e; }
+    .status-client { background: var(--success-light); color: #166534; }
+    .action-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .action-btn {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .action-btn:hover { background: var(--bg); }
+    .action-btn.copy:hover { border-color: var(--accent); color: var(--accent); }
+    .action-btn.delete:hover { border-color: var(--danger); color: var(--danger); }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+    .empty-state-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--card);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .modal-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    .form-input {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--success);
+      font-weight: 600;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .subscribers-panel {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      display: none;
+    }
+    .subscribers-panel.show { display: block; }
+    .subscriber-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .subscriber-item:last-child { border-bottom: none; }
+    .subscriber-email { font-weight: 500; }
+    .subscriber-date { font-size: 12px; color: var(--text-secondary); }
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .finder-grid { grid-template-columns: 1fr; }
+      table { font-size: 12px; }
+      thead th, tbody td { padding: 10px 12px; }
+      .email-cell { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">A</div>
+      Autoflow
+    </div>
+    <div class="header-actions">
+      <span class="live-indicator" id="liveIndicator" style="display:none">
+        <span class="live-dot"></span> LIVE
+      </span>
+      <button class="btn" onclick="exportCSV()">📥 Export CSV</button>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Prospect</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('overview')">Overview</div>
+      <div class="tab" onclick="switchTab('prospects')">Prospects</div>
+      <div class="tab" onclick="switchTab('clients')">Clients</div>
+      <div class="tab" onclick="switchTab('subscribers')">Subscribers</div>
+    </div>
+
+    <div id="overviewTab">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-label">MRR</div>
+          <div class="stat-value" id="statMRR">$0</div>
+          <div class="stat-bar"><div class="stat-bar-fill accent" id="barMRR" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Subscribers</div>
+          <div class="stat-value" id="statSubs">0</div>
+          <div class="stat-bar"><div class="stat-bar-fill accent" id="barSubs" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Prospects Found</div>
+          <div class="stat-value" id="statProspects">0</div>
+          <div class="stat-bar"><div class="stat-bar-fill warning" id="barProspects" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Emails Sent</div>
+          <div class="stat-value" id="statEmails">0</div>
+          <div class="stat-bar"><div class="stat-bar-fill danger" id="barEmails" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <div class="section-header">
+          <div class="section-title">Revenue Growth</div>
+          <button class="btn btn-sm" onclick="refreshChart()">↻ Refresh</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="finder-panel">
+        <div class="finder-title">🤖 Claude AI Prospect Finder</div>
+        <div class="finder-subtitle">Autonomously discovers business names, emails & contact info via Claude API</div>
+        <div class="finder-grid">
+          <select class="finder-input finder-select" id="finderIndustry">
+            <option value="">Select Industry</option>
+            <option value="law">Law Firms</option>
+            <option value="dental">Dental Practices</option>
+            <option value="accounting">Accounting Firms</option>
+            <option value="insurance">Insurance Agencies</option>
+            <option value="real_estate">Real Estate</option>
+            <option value="consulting">Consulting Firms</option>
+            <option value="marketing">Marketing Agencies</option>
+            <option value="tech">Tech Companies</option>
+          </select>
+          <input class="finder-input" id="finderCity" placeholder="City (e.g. New York, NY)" value="New York, NY">
+          <input class="finder-input" id="finderPain" placeholder="Pain point (e.g. lead generation)">
+          <input class="finder-input" id="finderCount" type="number" placeholder="How many?" value="10" min="1" max="50">
+        </div>
+        <button class="finder-btn" id="finderBtn" onclick="runClaudeFinder()">
+          <span id="finderBtnText">🔍 Find Prospects with Claude</span>
+        </button>
+        <div class="finder-status" id="finderStatus"></div>
+      </div>
+    </div>
+
+    <div id="prospectsTab" style="display:none">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">All Prospects</div>
+          <div class="table-actions">
+            <button class="btn btn-sm" onclick="clearAll()">Clear All</button>
+            <button class="btn btn-sm btn-primary" onclick="runClaudeFinder()">+ Find More</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Business</th>
+                <th>City</th>
+                <th>Rating</th>
+                <th>Pain Score</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th style="width:80px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="prospectsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none">
+          <div class="empty-state-icon">📭</div>
+          <div>No prospects yet. Use the Claude AI Finder to discover leads.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="clientsTab" style="display:none">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Clients</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Business</th>
+                <th>City</th>
+                <th>Rating</th>
+                <th>Pain Score</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th style="width:80px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyClients" style="display:none">
+          <div class="empty-state-icon">👥</div>
+          <div>No clients yet. Convert prospects to clients by editing their status.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="subscribersTab" style="display:none">
+      <div class="subscribers-panel show" id="subscribersPanel">
+        <div class="section-header">
+          <div class="section-title">Email Subscribers</div>
+          <span class="live-indicator"><span class="live-dot"></span> Auto-updates every 30s</span>
+        </div>
+        <div id="subscribersList">
+          <div class="empty-state">
+            <div class="empty-state-icon">📧</div>
+            <div>Loading subscribers...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-header" id="modalTitle">Add Prospect</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Business Name</label>
+          <input class="form-input" id="mName" placeholder="e.g. Smith & Associates LLC">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Industry / Type</label>
+          <input class="form-input" id="mType" placeholder="e.g. Law Firm">
+        </div>
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <input class="form-input" id="mCity" placeholder="e.g. New York, NY">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rating (1-5)</label>
+          <input class="form-input" id="mRating" type="number" min="1" max="5" step="0.1" value="4.0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pain Score (0-100)</label>
+          <input class="form-input" id="mPain" type="number" min="0" max="100" value="30">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="mEmail" placeholder="contact@company.com (optional)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="mStatus">
+            <option value="prospect">Prospect</option>
+            <option value="contacted">Contacted</option>
+            <option value="client">Client</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProspect()">Save Prospect</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let prospects = JSON.parse(localStorage.getItem('af_prospects') || '[]');
+    let subscribers = [];
+    let editingId = null;
+    let chartInstance = null;
+    let currentTab = 'overview';
+    let statsInterval = null;
+
+    let realStats = {
+      mrr: 0,
+      activeSubscribers: 0,
+      prospectsFound: 0,
+      emailsSent: 0
+    };
+
+    function init() {
+      loadProspects();
+      renderTable();
+      initChart();
+      fetchRealStats();
+      fetchSubscribers();
+      statsInterval = setInterval(() => {
+        fetchRealStats();
+        if (currentTab === 'subscribers') fetchSubscribers();
+      }, 30000);
+    }
+
+    async function fetchRealStats() {
+      try {
+        const res = await fetch('/api/stats');
+        if (res.ok) {
+          const data = await res.json();
+          realStats = {
+            mrr: data.mrr || 0,
+            activeSubscribers: data.activeSubscribers || 0,
+            prospectsFound: data.prospectCount || prospects.length,
+            emailsSent: data.emailCount || 0
+          };
+          updateStatsUI();
+          document.getElementById('liveIndicator').style.display = 'inline-flex';
+        }
+      } catch (e) {
+        realStats.prospectsFound = prospects.length;
+        realStats.activeSubscribers = prospects.filter(p => p.status === 'client').length;
+        realStats.mrr = realStats.activeSubscribers * 497;
+        updateStatsUI();
+      }
+    }
+
+    function updateStatsUI() {
+      document.getElementById('statMRR').textContent = '$' + realStats.mrr.toLocaleString();
+      document.getElementById('statSubs').textContent = realStats.activeSubscribers;
+      document.getElementById('statProspects').textContent = realStats.prospectsFound;
+      document.getElementById('statEmails').textContent = realStats.emailsSent;
+
+      document.getElementById('barMRR').style.width = Math.min(realStats.activeSubscribers * 10, 100) + '%';
+      document.getElementById('barSubs').style.width = Math.min(realStats.activeSubscribers * 10, 100) + '%';
+      document.getElementById('barProspects').style.width = Math.min(realStats.prospectsFound * 2, 100) + '%';
+      document.getElementById('barEmails').style.width = Math.min(realStats.emailsSent * 3, 100) + '%';
+    }
+
+    async function fetchSubscribers() {
+      try {
+        const res = await fetch('/api/subscribe');
+        if (res.ok) {
+          const data = await res.json();
+          subscribers = data.subscribers || [];
+          renderSubscribers();
+        }
+      } catch (e) {
+        subscribers = JSON.parse(localStorage.getItem('af_subscribers') || '[]');
+        renderSubscribers();
+      }
+    }
+
+    function renderSubscribers() {
+      const list = document.getElementById('subscribersList');
+      if (subscribers.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <div>No subscribers yet. When someone subscribes on your homepage, they will appear here automatically.</div>
+          </div>`;
+        return;
+      }
+      list.innerHTML = subscribers.map(s => `
+        <div class="subscriber-item">
+          <div>
+            <div class="subscriber-email">${escapeHtml(s.email)}</div>
+            <div class="subscriber-date">${s.name ? escapeHtml(s.name) + ' · ' : ''}${new Date(s.date).toLocaleDateString()}</div>
+          </div>
+          <span class="status-badge status-client">Active</span>
+        </div>
+      `).join('');
+    }
+
+    function loadProspects() {
+      const saved = localStorage.getItem('af_prospects');
+      if (saved) prospects = JSON.parse(saved);
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('prospectsBody');
+      const empty = document.getElementById('emptyState');
+      const clientsBody = document.getElementById('clientsBody');
+      const emptyClients = document.getElementById('emptyClients');
+
+      if (prospects.length === 0) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        clientsBody.innerHTML = '';
+        emptyClients.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      emptyClients.style.display = 'none';
+
+      const rows = prospects.map(p => makeRow(p)).join('');
+      tbody.innerHTML = rows;
+
+      const clients = prospects.filter(p => p.status === 'client');
+      if (clients.length === 0) {
+        clientsBody.innerHTML = '';
+        emptyClients.style.display = 'block';
+      } else {
+        emptyClients.style.display = 'none';
+        clientsBody.innerHTML = clients.map(p => makeRow(p)).join('');
+      }
+
+      realStats.prospectsFound = prospects.length;
+      realStats.activeSubscribers = clients.length;
+      realStats.mrr = clients.length * 497;
+      updateStatsUI();
+    }
+
+    function makeRow(p) {
+      const painClass = p.pain < 30 ? 'pain-low' : p.pain < 60 ? 'pain-med' : 'pain-high';
+      const statusClass = p.status === 'client' ? 'status-client' : p.status === 'contacted' ? 'status-contacted' : 'status-prospect';
+      const emailHtml = p.email ? `<a href="mailto:${p.email}">${p.email}</a>` : `<span class="email-missing">—</span>`;
+      return `
+        <tr data-id="${p.id}">
+          <td>
+            <div class="business-cell">
+              <span class="business-name">${escapeHtml(p.name)}</span>
+              <span class="business-type">${escapeHtml(p.type)}</span>
+            </div>
+          </td>
+          <td>${escapeHtml(p.city)}</td>
+          <td><span class="rating"><span class="rating-star">★</span>${p.rating.toFixed(1)}</span></td>
+          <td><span class="pain-score ${painClass}">${p.pain}</span></td>
+          <td class="email-cell">${emailHtml}</td>
+          <td><span class="status-badge ${statusClass}">${capitalize(p.status)}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="action-btn copy" onclick="copyEmail(${p.id})" title="Copy email">📋</button>
+              <button class="action-btn" onclick="editProspect(${p.id})" title="Edit">✏️</button>
+              <button class="action-btn delete" onclick="deleteProspect(${p.id})" title="Delete">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun'];
+      const baseMRR = realStats.activeSubscribers * 497;
+      const data = months.map((_, i) => Math.max(baseMRR * (i + 1) / 6, 0));
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [{
+            label: 'MRR ($)',
+            data: data,
+            borderColor: '#0d9488',
+            backgroundColor: 'rgba(13,148,136,0.08)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#0d9488',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: '#f0f0f0' },
+              ticks: { font: { size: 11 }, color: '#9ca3af', callback: v => '$' + v }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 11 }, color: '#9ca3af' }
+            }
+          }
+        }
+      });
+    }
+    function refreshChart() {
+      if (chartInstance) {
+        const baseMRR = realStats.activeSubscribers * 497;
+        chartInstance.data.datasets[0].data = chartInstance.data.datasets[0].data.map((_, i) => 
+          Math.max(baseMRR * (i + 1) / 6 + Math.floor(Math.random() * 200 - 100), 0)
+        );
+        chartInstance.update();
+      }
+    }
+
+    async function runClaudeFinder() {
+      const industry = document.getElementById('finderIndustry').value;
+      const city = document.getElementById('finderCity').value.trim();
+      const pain = document.getElementById('finderPain').value.trim();
+      const count = parseInt(document.getElementById('finderCount').value) || 10;
+      const btn = document.getElementById('finderBtn');
+      const btnText = document.getElementById('finderBtnText');
+      const status = document.getElementById('finderStatus');
+
+      if (!industry || !city) {
+        showFinderStatus('Please select an industry and enter a city.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Claude is searching...';
+      showFinderStatus('Connecting to Claude API... This may take 10–30 seconds.', 'info');
+
+      try {
+        const response = await fetch('/api/prospects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ industry, city, pain, count })
+        });
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (parseErr) {
+          const text = await response.text();
+          throw new Error('Server returned invalid JSON: ' + text.substring(0, 200));
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Server error: ' + response.status);
+        }
+
+        const found = data.prospects || [];
+
+        if (!found.length) {
+          showFinderStatus('No prospects found. Try different search terms.', 'error');
+          btn.disabled = false;
+          btnText.textContent = '🔍 Find Prospects with Claude';
+          return;
+        }
+
+        const newProspects = found.map(p => ({
+          id: Date.now() + Math.random().toString(36).substr(2, 9),
+          name: p.name || 'Unknown Business',
+          type: p.type || capitalize(industry),
+          city: p.city || city,
+          rating: parseFloat(p.rating) || 4.0,
+          pain: parseInt(p.pain) || 30,
+          email: p.email || '',
+          status: 'prospect',
+          date: new Date().toISOString(),
+          source: 'claude'
+        }));
+
+        prospects = [...newProspects, ...prospects];
+        saveProspects();
+        renderTable();
+
+        showFinderStatus(`✅ Found ${found.length} prospects in ${city}! Names, emails & pain scores added.`, 'success');
+        showToast(`Added ${found.length} new prospects from Claude`);
+
+      } catch (err) {
+        console.error('Claude Finder Error:', err);
+        showFinderStatus('❌ ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = '🔍 Find Prospects with Claude';
+      }
+    }
+
+    function showFinderStatus(msg, type) {
+      const el = document.getElementById('finderStatus');
+      el.textContent = msg;
+      el.className = 'finder-status show ' + type;
+    }
+
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = 'Add Prospect';
+      document.getElementById('mName').value = '';
+      document.getElementById('mType').value = '';
+      document.getElementById('mCity').value = '';
+      document.getElementById('mRating').value = '4.0';
+      document.getElementById('mPain').value = '30';
+      document.getElementById('mEmail').value = '';
+      document.getElementById('mStatus').value = 'prospect';
+      document.getElementById('modal').classList.add('show');
+    }
+    function editProspect(id) {
+      const p = prospects.find(x => x.id === id);
+      if (!p) return;
+      editingId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Prospect';
+      document.getElementById('mName').value = p.name;
+      document.getElementById('mType').value = p.type;
+      document.getElementById('mCity').value = p.city;
+      document.getElementById('mRating').value = p.rating;
+      document.getElementById('mPain').value = p.pain;
+      document.getElementById('mEmail').value = p.email;
+      document.getElementById('mStatus').value = p.status;
+      document.getElementById('modal').classList.add('show');
+    }
+    function saveProspect() {
+      const name = document.getElementById('mName').value.trim();
+      if (!name) { showToast('Business name is required'); return; }
+      const obj = {
+        id: editingId || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        name,
+        type: document.getElementById('mType').value.trim() || 'Business',
+        city: document.getElementById('mCity').value.trim() || 'Unknown',
+        rating: parseFloat(document.getElementById('mRating').value) || 4.0,
+        pain: parseInt(document.getElementById('mPain').value) || 30,
+        email: document.getElementById('mEmail').value.trim(),
+        status: document.getElementById('mStatus').value,
+        date: new Date().toISOString()
+      };
+      if (editingId) {
+        const idx = prospects.findIndex(p => p.id === editingId);
+        prospects[idx] = obj;
+      } else {
+        prospects.unshift(obj);
+      }
+      saveProspects();
+      renderTable();
+      closeModal();
+      showToast(editingId ? 'Prospect updated' : 'Prospect added');
+    }
+    function deleteProspect(id) {
+      if (!confirm('Delete this prospect?')) return;
+      prospects = prospects.filter(p => p.id !== id);
+      saveProspects();
+      renderTable();
+      showToast('Prospect deleted');
+    }
+    function clearAll() {
+      if (!confirm('Clear ALL prospects? This cannot be undone.')) return;
+      prospects = [];
+      saveProspects();
+      renderTable();
+      showToast('All prospects cleared');
+    }
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+    function copyEmail(id) {
+      const p = prospects.find(x => x.id === id);
+      if (p && p.email) {
+        navigator.clipboard.writeText(p.email);
+        showToast('Email copied: ' + p.email);
+      } else {
+        showToast('No email to copy');
+      }
+    }
+    function exportCSV() {
+      const headers = ['Name','Type','City','Rating','Pain Score','Email','Status','Date'];
+      const rows = prospects.map(p => [
+        p.name, p.type, p.city, p.rating, p.pain, p.email, p.status, p.date
+      ]);
+      const csv = [headers, ...rows].map(r => r.map(f => '"' + String(f).replace(/"/g,'""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'autoflow-prospects.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('CSV exported');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('overviewTab').style.display = tab === 'overview' ? 'block' : 'none';
+      document.getElementById('prospectsTab').style.display = tab === 'prospects' ? 'block' : 'none';
+      document.getElementById('clientsTab').style.display = tab === 'clients' ? 'block' : 'none';
+      document.getElementById('subscribersTab').style.display = tab === 'subscribers' ? 'block' : 'none';
+
+      if (tab === 'subscribers') fetchSubscribers();
+    }
+
+    function saveProspects() {
+      localStorage.setItem('af_prospects', JSON.stringify(prospects));
+    }
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    function capitalize(s) {
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    document.getElementById('modal').addEventListener('click', e => {
+      if (e.target === document.getElementById('modal')) closeModal();
+    });
+
+    init();
+  </script>
+</body>
+</html>
