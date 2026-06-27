@@ -3,67 +3,412 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Autoflow — AI Receptionist & Reputation Manager</title>
-<meta name="description" content="Autoflow answers your phones and manages your reviews automatically, 24/7. No staff. No missed calls. No unanswered reviews.">
+<title>Autoflow — AI Reputation & Receptionist for Every Business</title>
+<meta name="description" content="Autoflow answers your phones and manages your reviews — automatically, 24/7, without staff.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#F7F6F2;
-  --surface:#FFFFFF;
-  --navy:#0F2744;
-  --navy-mid:#1A3A5C;
-  --navy-light:#E8EEF5;
-  --text:#1A1A1A;
-  --mid:#4A5568;
-  --faint:#94A3B8;
-  --line:#E2DDD6;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#F7F6F2;--surface:#fff;--navy:#0F2744;--navy-mid:#1A3A5C;--navy-light:#E8EEF5;--text:#1A1A1A;--text-mid:#4A5568;--text-faint:#94A3B8;--line:#E2DDD6;}
+*{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
-::selection{background:var(--navy);color:#fff;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 a{color:inherit;text-decoration:none;}
-.mono{font-family:'JetBrains Mono',monospace;}
 .wrap{max-width:1100px;margin:0 auto;padding:0 28px;}
 
-/* ─── FIX SHAKING ─── */
-.hero { min-height: 600px; }
-.hero-inner { min-height: 450px; }
-.demo-panels { min-height: 400px; }
-.ticker-wrap { height: 50px; display: flex; align-items: center; overflow: hidden; position: relative; }
-
 /* NAV */
-nav{
-  position:sticky;top:0;z-index:100;
-  background:var(--bg);border-bottom:1px solid var(--line);
-  padding:0 28px;
-}
-.nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:20px 0;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line);background:var(--bg);}
 .logo{display:flex;align-items:center;gap:10px;}
-.logo-mark{width:34px;height:34px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;}
+.logo-mark{width:32px;height:32px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;}
 .logo-mark svg{width:16px;height:16px;fill:#fff;}
-.logo-text{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;letter-spacing:.02em;}
-.nav-links{display:flex;align-items:center;gap:28px;font-size:14px;font-weight:500;color:var(--mid);}
-.nav-links a{transition:color .15s;}
+.logo-text{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;}
+.nav-links{display:flex;align-items:center;gap:28px;font-size:14px;font-weight:500;color:var(--text-mid);}
 .nav-links a:hover{color:var(--text);}
-.nav-cta{background:var(--navy);color:#fff;padding:11px 22px;border-radius:4px;font-weight:600;transition:opacity .15s;}
+.nav-cta{background:var(--navy);color:#fff !important;padding:10px 20px;border-radius:4px;font-size:14px;font-weight:600;}
 .nav-cta:hover{opacity:.85;}
-@media(max-width:640px){.nav-hide{display:none;}}
+@media(max-width:640px){.nav-links span{display:none;}.nav-links{gap:14px;}}
 
 /* HERO */
 .hero{padding:72px 0 56px;}
 .hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
 @media(max-width:860px){.hero-inner{grid-template-columns:1fr;}}
-.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 13px;background:var(--navy-light);border-radius:100px;font-size:12px;font-weight:600;color:var(--navy-mid);letter-spacing:.05em;text-transform:uppercase;margin-bottom:22px;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--navy-mid);display:inline-block;animation:blink 1.8s ease-in-out infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.15;}}
-h1{font-family:'Playfair Display',serif;font-size:clamp(36px,4.5vw,52px);font-weight:500;line-height:1.08;letter-spacing:-.01em;margin-bottom:20px;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;background:var(--navy-light);border-radius:100px;font-size:12.5px;font-weight:600;color:var(--navy-mid);letter-spacing:.04em;text-transform:uppercase;margin-bottom:22px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--navy-mid);flex-shrink:0;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(36px,4.5vw,52px);font-weight:500;line-height:1.1;letter-spacing:-.01em;margin-bottom:20px;}
 h1 em{font-style:italic;}
-.hero-sub{color:var(--mid);font-size:17px;max-width:44ch;line-height:1.65;margin-bottom:28px;}
+.hero-sub{color:var(--text-mid);font-size:17px;max-width:44ch;line-height:1.65;margin-bottom:30px;}
 .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;}
-.btn{padding:13px 24px;border-radius:4px;font-weight:600;font-size:14.5px;cursor:pointer;border:2px solid var(--navy);transition:all .15s;display:inline-block;font-family:'DM Sans',sans-serif;}
+.btn{padding:13px 24px;border-radius:4px;font-weight:600;font-size:14.5px;cursor:pointer;border:2px solid var(--navy);display:inline-block;transition:all .15s;}
 .btn-primary{background:var(--navy);color:#fff;}
 .btn-primary:hover{background:var(--navy-mid);}
-.btn-outline{background:transparent;color:var(--nav
+.btn-outline{background:transparent;color:var(--navy);}
+.btn-outline:hover{background:var(--navy);color:#fff;}
+.hero-proof{margin-top:22px;font-size:13px;color:var(--text-faint);}
+.hero-proof strong{color:var(--text-mid);}
+
+/* DEMO PANELS */
+.demo-panels{display:flex;flex-direction:column;gap:12px;}
+.demo-panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.demo-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:#FAFAF8;}
+.dd{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.demo-title{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-mid);margin-left:2px;}
+.demo-badge{margin-left:auto;background:var(--navy-light);color:var(--navy-mid);font-size:10.5px;font-weight:600;letter-spacing:.06em;padding:2px 8px;border-radius:100px;}
+.call-body{padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;height:180px;overflow:hidden;}
+.call-line{margin-bottom:2px;opacity:0;animation:fl .3s forwards;}
+@keyframes fl{to{opacity:1;}}
+.cl-ai{color:var(--navy-mid);}
+.cl-caller{color:var(--text-mid);}
+.cl-sys{color:var(--text-faint);font-size:10.5px;}
+.review-body{padding:14px;}
+.review-original{background:#FEF2F2;border-left:3px solid #F87171;padding:10px 12px;border-radius:4px;font-size:13px;color:#7F1D1D;margin-bottom:10px;font-style:italic;line-height:1.55;}
+.review-arrow{font-size:11px;color:var(--text-faint);margin-bottom:8px;font-family:'JetBrains Mono',monospace;}
+.review-response{background:var(--navy-light);border-left:3px solid var(--navy);padding:10px 12px;border-radius:4px;font-size:13px;color:var(--navy);line-height:1.55;min-height:60px;}
+#rt{display:inline;}
+.cur{display:inline-block;width:2px;height:13px;background:var(--navy);margin-left:2px;vertical-align:middle;animation:blink .7s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* INDUSTRIES */
+.industries{padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.ind-track{display:flex;flex-wrap:wrap;justify-content:center;}
+.ind-item{white-space:nowrap;padding:8px 28px;font-size:13.5px;font-weight:500;color:var(--text-mid);border-right:1px solid var(--line);}
+.ind-item:last-child{border-right:none;}
+
+/* SECTIONS */
+section{padding:72px 0;border-top:1px solid var(--line);}
+.sec-label{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:14px;}
+h2{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,36px);font-weight:500;margin-bottom:10px;max-width:22ch;}
+.sec-sub{color:var(--text-mid);font-size:16px;max-width:52ch;margin-bottom:44px;}
+
+/* SERVICES */
+.services-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+@media(max-width:700px){.services-grid{grid-template-columns:1fr;}}
+.svc{background:var(--surface);padding:32px 30px;}
+.svc.featured{background:var(--navy);color:#fff;}
+.svc-icon{font-size:26px;margin-bottom:16px;}
+.svc-name{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;margin-bottom:10px;}
+.svc-desc{font-size:14.5px;line-height:1.65;margin-bottom:20px;color:var(--text-mid);}
+.svc.featured .svc-desc{color:rgba(255,255,255,.7);}
+.svc-features{list-style:none;}
+.svc-features li{font-size:13.5px;padding:7px 0;border-top:1px solid var(--line);color:var(--text-mid);}
+.svc.featured .svc-features li{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.8);}
+.svc-features li::before{content:'✓  ';font-weight:700;}
+
+/* PIPELINE */
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+@media(max-width:820px){.pipeline{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.pipeline{grid-template-columns:1fr;}}
+.pipe-step{background:var(--surface);padding:26px 22px;}
+.pipe-arrow{font-size:20px;margin-bottom:14px;color:var(--navy-mid);}
+.pipe-step h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;margin-bottom:8px;}
+.pipe-step p{font-size:13.5px;color:var(--text-mid);line-height:1.6;}
+
+/* CITIES */
+.cities-wrap{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px;margin-top:36px;}
+.cities-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:16px;}
+.cities-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.city-chip{background:var(--bg);border:1px solid var(--line);border-radius:100px;padding:5px 14px;font-size:13px;color:var(--text-mid);display:flex;align-items:center;gap:6px;}
+.city-chip .cdot{width:6px;height:6px;border-radius:50%;background:var(--navy);opacity:.4;flex-shrink:0;}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+@media(max-width:700px){.pricing-grid{grid-template-columns:1fr;}}
+.plan{background:var(--surface);padding:30px 26px;display:flex;flex-direction:column;}
+.plan.best{background:var(--navy);color:#fff;}
+.plan-badge{display:inline-block;margin-bottom:14px;padding:3px 10px;background:rgba(255,255,255,.15);border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.plan-name{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px;}
+.plan.best .plan-name{color:rgba(255,255,255,.6);}
+.plan-price{font-family:'Playfair Display',serif;font-size:40px;font-weight:500;margin-bottom:4px;}
+.plan-period{font-size:13px;color:var(--text-mid);margin-bottom:16px;}
+.plan.best .plan-period{color:rgba(255,255,255,.6);}
+.plan-what{font-size:13.5px;color:var(--text-mid);margin-bottom:20px;line-height:1.5;}
+.plan.best .plan-what{color:rgba(255,255,255,.75);}
+.plan ul{list-style:none;flex:1;margin-bottom:24px;}
+.plan li{font-size:13.5px;color:var(--text-mid);padding:8px 0;border-top:1px solid var(--line);}
+.plan.best li{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.8);}
+.plan li:before{content:'— ';}
+.plan-btn{display:block;width:100%;padding:13px;text-align:center;border-radius:4px;font-weight:600;font-size:14px;border:2px solid var(--navy);background:transparent;color:var(--navy);transition:all .15s;}
+.plan-btn:hover{background:var(--navy);color:#fff;}
+.plan.best .plan-btn{border-color:#fff;color:var(--navy);background:#fff;}
+.plan.best .plan-btn:hover{background:transparent;color:#fff;}
+.pay-row{margin-top:20px;text-align:center;font-size:12.5px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;}
+
+/* CONTACT */
+.contact-form-wrap{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:32px;max-width:560px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:12.5px;font-weight:600;color:var(--text-mid);margin-bottom:6px;}
+.form-group input,.form-group textarea{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--navy);outline:none;}
+.form-group textarea{resize:vertical;min-height:100px;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.foot-left{font-family:'Playfair Display',serif;font-size:16px;}
+.foot-right{font-size:12.5px;color:var(--text-faint);}
+.foot-contact{width:100%;text-align:center;margin-top:12px;font-size:13px;color:var(--text-mid);font-family:'JetBrains Mono',monospace;display:flex;flex-direction:column;gap:4px;align-items:center;}
+.foot-contact a{color:var(--navy-mid);}
+.foot-contact a:hover{color:var(--navy);text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<nav>
+  <div class="logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2a10 10 0 1 0 10 10"/></svg></div>
+    <div class="logo-text">Autoflow</div>
+  </div>
+  <div class="nav-links">
+    <a href="#services"><span>Services</span></a>
+    <a href="#how"><span>How it works</span></a>
+    <a href="#pricing"><span>Pricing</span></a>
+    <a href="#pricing" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag"><span class="live-dot"></span> Active in 50+ cities</div>
+      <h1>Your phone answers itself.<br><em>Your reviews reply themselves.</em></h1>
+      <p class="hero-sub">Autoflow is an AI receptionist and reputation manager that works 24/7 — no staff, no missed calls, no unanswered reviews. Drop it in front of any business in under 10 minutes.</p>
+      <div class="hero-ctas">
+        <a href="#pricing" class="btn btn-primary">Start free trial</a>
+        <a href="#services" class="btn btn-outline">See both services</a>
+      </div>
+      <p class="hero-proof">No setup fees. <strong>Cancel anytime.</strong> Card or crypto accepted.</p>
+    </div>
+    <div class="demo-panels">
+      <div class="demo-panel">
+        <div class="demo-header">
+          <div class="dd" style="background:#F87171"></div>
+          <div class="dd" style="background:#FBBF24"></div>
+          <div class="dd" style="background:#34D399"></div>
+          <div class="demo-title">AI Receptionist — live call</div>
+          <div class="demo-badge">● LIVE</div>
+        </div>
+        <div class="call-body" id="callBody"></div>
+      </div>
+      <div class="demo-panel">
+        <div class="demo-header">
+          <div class="dd" style="background:#F87171"></div>
+          <div class="dd" style="background:#FBBF24"></div>
+          <div class="dd" style="background:#34D399"></div>
+          <div class="demo-title">AI Reputation — response drafted</div>
+          <div class="demo-badge">● AUTO</div>
+        </div>
+        <div class="review-body">
+          <div class="review-original">★☆☆☆☆ "Waited 45 mins past my appointment. Front desk was rude when I asked about the wait. Will not be returning."</div>
+          <div class="review-arrow">→ Autoflow generating response...</div>
+          <div class="review-response"><span id="rt"></span><span class="cur" id="cur"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="industries">
+  <div class="ind-track" id="indTrack"></div>
+</div>
+
+<div class="wrap">
+
+<section id="services">
+  <div class="sec-label">Two services. One platform.</div>
+  <h2>Everything a business needs at the front door.</h2>
+  <p class="sec-sub">Use either service on its own, or run both together for full front-of-house automation.</p>
+  <div class="services-grid">
+    <div class="svc">
+      <div class="svc-icon">☎</div>
+      <div class="svc-name">AI Receptionist</div>
+      <p class="svc-desc">A voice AI that answers every call instantly, books appointments, qualifies leads, and routes urgent calls to the right person — 24 hours a day, no hold music.</p>
+      <ul class="svc-features">
+        <li>Answers calls in under 2 rings, every time</li>
+        <li>Books directly into your calendar</li>
+        <li>Handles FAQs, hours, directions, pricing</li>
+        <li>Escalates genuinely urgent calls to staff</li>
+        <li>Call summaries emailed after each interaction</li>
+        <li>Custom voice and script for your brand</li>
+      </ul>
+    </div>
+    <div class="svc featured">
+      <div class="svc-icon">⭐</div>
+      <div class="svc-name">AI Reputation Manager</div>
+      <p class="svc-desc">Monitors every review across Google, Yelp, TripAdvisor, Facebook, and BBB — and responds on your behalf within minutes, in your brand's voice.</p>
+      <ul class="svc-features">
+        <li>Monitors 8 major review platforms</li>
+        <li>AI response drafted & posted within 15 min</li>
+        <li>Negative reviews escalated to you by text</li>
+        <li>Monthly reputation report with trend data</li>
+        <li>Proactive review request campaigns</li>
+        <li>Competitor review tracking included</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="sec-label">Customer acquisition</div>
+  <h2>How Autoflow finds its own next clients.</h2>
+  <p class="sec-sub">No cold calls from you. No ad spend required. Autoflow uses AI to quietly source its own pipeline, city by city.</p>
+  <div class="pipeline">
+    <div class="pipe-step"><div class="pipe-arrow">⊙</div><h3>Scan every city</h3><p>Automated scrapers pull every registered business from Google Maps and local directories across the 50 largest US cities.</p></div>
+    <div class="pipe-step"><div class="pipe-arrow">⊘</div><h3>Score the pain</h3><p>Each business gets a pain score: unanswered reviews, sub-4.0 rating, no review responses in 90 days.</p></div>
+    <div class="pipe-step"><div class="pipe-arrow">✉</div><h3>Write the pitch</h3><p>AI writes a personalized cold email referencing the specific unanswered review or missed-call signal. No templates — each email is unique.</p></div>
+    <div class="pipe-step"><div class="pipe-arrow">→</div><h3>Follow up & convert</h3><p>Two follow-ups go automatically if there's no reply. Stripe closes the sale. Subscriber is live within minutes.</p></div>
+  </div>
+  <div class="cities-wrap">
+    <div class="cities-label">Cities currently being targeted</div>
+    <div class="cities-grid" id="citiesGrid"></div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="sec-label">Pricing</div>
+  <h2>Start with one service. Add the other when it pays for itself.</h2>
+  <p class="sec-sub">Every plan includes the AI acquisition engine — Autoflow finds its next customer while it's managing yours.</p>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Reputation Only</div>
+      <div class="plan-price">$99</div>
+      <div class="plan-period">per month</div>
+      <div class="plan-what">Full reputation management across all major platforms. AI responds to every review.</div>
+      <ul>
+        <li>8-platform review monitoring</li>
+        <li>AI responses within 15 minutes</li>
+        <li>Negative review escalation</li>
+        <li>Monthly report</li>
+        <li>Review request campaigns</li>
+      </ul>
+      <a class="plan-btn" href="https://buy.stripe.com/3cI5kE2sqczUdJh26p9oc06">Get started</a>
+    </div>
+    <div class="plan best">
+      <div class="plan-badge">Most popular</div>
+      <div class="plan-name">Full Suite</div>
+      <div class="plan-price">$599</div>
+      <div class="plan-period">per month</div>
+      <div class="plan-what">AI Receptionist + AI Reputation Manager together. The complete front-of-house.</div>
+      <ul>
+        <li>Everything in Reputation</li>
+        <li>24/7 AI receptionist</li>
+        <li>Custom voice & script</li>
+        <li>Calendar booking integration</li>
+        <li>Call summary emails</li>
+      </ul>
+      <a class="plan-btn" href="https://buy.stripe.com/6oUeVeeb88jEeNl5iB9oc05">Get the suite</a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Enterprise</div>
+      <div class="plan-period">multi-location pricing</div>
+      <div class="plan-what">For chains, franchises, and regional operators with 5+ locations. Volume rates available.</div>
+      <ul>
+        <li>Location-level dashboards</li>
+        <li>Branded voice per location</li>
+        <li>API/webhook access</li>
+        <li>Dedicated account setup</li>
+        <li>Volume pricing from $199/location</li>
+      </ul>
+      <a class="plan-btn" href="#contact">Contact us</a>
+    </div>
+  </div>
+  <div class="pay-row">PAYMENT — visa / mastercard / amex / usdc · btc / eth / usdt (coingate)</div>
+</section>
+
+<section id="contact">
+  <div class="sec-label">Get in touch</div>
+  <h2>Enterprise & custom pricing.</h2>
+  <p class="sec-sub">For chains, franchises, and regional operators with 5+ locations. Tell us what you need and we'll reply within 24 hours.</p>
+  <div class="contact-form-wrap">
+    <form action="https://formsubmit.co/autoflowicu@yahoo.com" method="POST">
+      <input type="hidden" name="_subject" value="New Autoflow Enterprise Inquiry">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="https://autoflow.icu/thanks">
+      <div class="form-row">
+        <div class="form-group"><label>Name</label><input type="text" name="name" placeholder="Your name" required></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email" placeholder="you@company.com" required></div>
+      </div>
+      <div class="form-group"><label>Company</label><input type="text" name="company" placeholder="Your business name"></div>
+      <div class="form-group"><label>Number of locations</label><input type="number" name="locations" placeholder="e.g. 12" min="1"></div>
+      <div class="form-group"><label>Message</label><textarea name="message" rows="4" placeholder="Tell us about your needs..."></textarea></div>
+      <button type="submit" class="btn btn-primary" style="width:100%">Send message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-left">Autoflow</div>
+  <div class="foot-right">© 2026 · Not affiliated with any review platform · Results vary by business</div>
+  <div class="foot-contact">
+    <a href="mailto:autoflowicu@yahoo.com">autoflowicu@yahoo.com</a>
+    <a href="tel:+14087594429">+1 408-759-4429</a>
+  </div>
+</footer>
+
+</div>
+
+<script>
+// CALL SIMULATION
+var callScript = [
+  {cls:'cl-sys', text:'[Incoming call — Dr. Patel Dental Group — 11:43 AM]'},
+  {cls:'cl-ai',  text:"AI: Thank you for calling Dr. Patel's office. How can I help you today?"},
+  {cls:'cl-caller', text:"Caller: Hi, I need to schedule a cleaning, I'm a new patient."},
+  {cls:'cl-ai',  text:"AI: Welcome! I'd love to get you booked. Are mornings or afternoons better?"},
+  {cls:'cl-caller', text:'Caller: Mornings, before 10 if possible.'},
+  {cls:'cl-ai',  text:"AI: Perfect — I have Tuesday the 24th at 8:30 AM. Shall I book that for you?"},
+  {cls:'cl-caller', text:'Caller: Yes, that works great.'},
+  {cls:'cl-ai',  text:"AI: Done. You'll get a confirmation text in just a moment. See you Tuesday!"},
+  {cls:'cl-sys', text:'[Appointment booked — calendar updated — summary emailed to Dr. Patel]'},
+];
+function runCall() {
+  var body = document.getElementById('callBody');
+  if (!body) return;
+  body.innerHTML = '';
+  callScript.forEach(function(line, i) {
+    setTimeout(function() {
+      var el = document.createElement('div');
+      el.className = 'call-line ' + line.cls;
+      el.textContent = line.text;
+      body.appendChild(el);
+    }, i * 900);
+  });
+  setTimeout(runCall, callScript.length * 900 + 3000);
+}
+runCall();
+
+// REVIEW TYPEWRITER
+var reviewFull = "Thank you for your feedback. We sincerely apologize for the wait and for the experience you had with our front desk team. This is not the standard we hold ourselves to, and we'd love the opportunity to make it right. Please reach out to us directly — we're committed to earning your trust back.";
+var revIdx = 0;
+function typeReview() {
+  var el = document.getElementById('rt');
+  var cur = document.getElementById('cur');
+  if (!el) return;
+  if (revIdx < reviewFull.length) {
+    el.textContent += reviewFull[revIdx];
+    revIdx++;
+    setTimeout(typeReview, 28 + Math.random() * 18);
+  } else {
+    if (cur) cur.style.display = 'none';
+    setTimeout(function() {
+      revIdx = 0;
+      el.textContent = '';
+      if (cur) cur.style.display = '';
+      setTimeout(typeReview, 1200);
+    }, 4000);
+  }
+}
+setTimeout(typeReview, 2200);
+
+// INDUSTRIES
+var industries = ['Dental Offices','Law Firms','Auto Dealerships','Restaurants','Medical Practices','Real Estate Agencies','Hotels & Motels','Barbershops & Salons','Veterinary Clinics','HVAC & Plumbing','Gyms & Fitness Studios','Optometrists','Chiropractors','Accounting Firms','Physical Therapy','Spas & MedSpas','Roofing Companies','Pest Control','Urgent Care Centers','Mortgage Brokers','Insurance Agencies','Home Inspectors','Car Washes','Landscaping Companies','Flooring & Tile'];
+var track = document.getElementById('indTrack');
+if (track) track.innerHTML = industries.map(function(i){ return '<div class="ind-item">'+i+'</div>'; }).join('');
+
+// CITIES
+var cities = ['Houston TX','New York NY','Los Angeles CA','Chicago IL','Phoenix AZ','Philadelphia PA','San Antonio TX','San Diego CA','Dallas TX','San Jose CA','Austin TX','Jacksonville FL','Fort Worth TX','Columbus OH','Charlotte NC','Indianapolis IN','San Francisco CA','Seattle WA','Denver CO','Nashville TN','Oklahoma City OK','El Paso TX','Las Vegas NV','Louisville KY','Memphis TN','Portland OR','Baltimore MD','Milwaukee WI','Albuquerque NM','Tucson AZ','Fresno CA','Sacramento CA','Mesa AZ','Kansas City MO','Atlanta GA','Omaha NE','Colorado Springs CO','Raleigh NC','Miami FL','Virginia Beach VA','Long Beach CA','Minneapolis MN','Tampa FL','New Orleans LA','Arlington TX','Bakersfield CA','Honolulu HI','Anaheim CA','Aurora CO','Santa Ana CA'];
+var grid = document.getElementById('citiesGrid');
+if (grid) grid.innerHTML = cities.map(function(c){ return '<div class="city-chip"><span class="cdot"></span>'+c+'</div>'; }).join('');
+</script>
+</body>
+</html>
