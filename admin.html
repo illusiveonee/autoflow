@@ -1,4 +1,4 @@
-'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -33,7 +33,6 @@ a{color:inherit;text-decoration:none;}
 .mono{font-family:'JetBrains Mono',monospace;}
 .wrap{max-width:1200px;margin:0 auto;padding:0 24px;}
 
-/* NAV */
 nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--line);padding:0 24px;}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
 .logo{display:flex;align-items:center;gap:10px;}
@@ -43,29 +42,24 @@ nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px sol
 .back-link{font-size:13px;color:var(--mid);font-weight:500;}
 .back-link:hover{color:var(--navy);}
 
-/* TABS */
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:32px;overflow-x:auto;}
 .tab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;}
 .tab:hover{color:var(--mid);}
 .tab.active{color:var(--navy);border-color:var(--navy);}
 
-/* PANELS */
 .panel{display:none;}
 .panel.active{display:block;animation:fade .25s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-/* CARDS */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:28px;margin-bottom:20px;}
 .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
 .card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;}
 .card-sub{color:var(--mid);font-size:13.5px;margin-top:4px;max-width:60ch;line-height:1.6;}
 
-/* GRID */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
 @media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr;}}
 
-/* FORM */
 .fg{margin-bottom:18px;}
 .fg label{display:block;font-size:12px;font-weight:600;color:var(--mid);margin-bottom:6px;letter-spacing:.02em;}
 .fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);transition:border-color .15s;}
@@ -73,7 +67,6 @@ nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px sol
 .fg textarea{resize:vertical;min-height:90px;}
 .fg small{display:block;margin-top:4px;font-size:11.5px;color:var(--faint);}
 
-/* BUTTONS */
 .btn{padding:11px 20px;border-radius:4px;font-weight:600;font-size:13.5px;cursor:pointer;border:2px solid var(--navy);transition:all .15s;display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;}
 .btn-primary{background:var(--navy);color:#fff;}
 .btn-primary:hover{background:var(--navy-mid);}
@@ -85,26 +78,22 @@ nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px sol
 .btn-success{border-color:var(--success);color:var(--success);}
 .btn-success:hover{background:var(--success);color:#fff;}
 
-/* ALERTS */
 .alert{padding:14px 18px;border-radius:6px;font-size:13px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;}
 .alert-warn{background:var(--warning-light);color:var(--warning);border:1px solid #FCD34D;}
 .alert-danger{background:var(--danger-light);color:var(--danger);border:1px solid #FECACA;}
 .alert-info{background:var(--navy-light);color:var(--navy-mid);border:1px solid #CBD5E1;}
 
-/* STATS */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
 @media(max-width:700px){.stat-grid{grid-template-columns:1fr 1fr;}}
 .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:22px 20px;}
 .stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:500;color:var(--navy);}
 .stat-label{font-size:12px;color:var(--faint);margin-top:4px;}
 
-/* PROMPT BOX */
 .prompt-box{background:#0F172A;border-radius:8px;padding:20px;color:#E2E8F0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;position:relative;overflow:hidden;}
 .prompt-box .copy-btn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);color:#fff;border:none;padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .prompt-box .copy-btn:hover{background:rgba(255,255,255,.2);}
 .prompt-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748B;margin-bottom:10px;}
 
-/* TABLES */
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{text-align:left;padding:12px 16px;background:#FAFAF8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -119,7 +108,6 @@ tr:hover td{background:#FAFAF8;}
 .status-paused{background:var(--warning-light);color:var(--warning);}
 .status-cancelled{background:var(--danger-light);color:var(--danger);}
 
-/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(15,39,68,.35);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border-radius:10px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.15);}
@@ -127,10 +115,15 @@ tr:hover td{background:#FAFAF8;}
 .modal-body{padding:20px 28px 28px;}
 .modal-title{font-family:'Playfair Display',serif;font-size:22px;}
 
-/* TAGS */
 .tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;background:var(--navy-light);color:var(--navy-mid);margin-right:4px;margin-bottom:4px;}
 
-/* UTILS */
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.result-preview{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:12px;}
+.result-preview h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.result-preview p{font-size:12.5px;color:var(--mid);margin-bottom:2px;}
+
 .hidden{display:none !important;}
 .mt-2{margin-top:8px;}
 .mt-3{margin-top:12px;}
@@ -153,7 +146,6 @@ tr:hover td{background:#FAFAF8;}
 
 <div class="wrap" style="padding-top:32px;padding-bottom:60px;">
 
-  <!-- STATS -->
   <div class="stat-grid">
     <div class="stat-card">
       <div class="stat-num" id="statProspects">0</div>
@@ -173,7 +165,6 @@ tr:hover td{background:#FAFAF8;}
     </div>
   </div>
 
-  <!-- TABS -->
   <div class="tabs">
     <div class="tab active" onclick="switchTab('prospect')">Prospect Finder</div>
     <div class="tab" onclick="switchTab('email')">Email Forge</div>
@@ -182,14 +173,13 @@ tr:hover td{background:#FAFAF8;}
     <div class="tab" onclick="switchTab('settings')">Settings</div>
   </div>
 
-  <!-- PANEL: PROSPECT FINDER -->
   <div class="panel active" id="panel-prospect">
     <div class="grid-2">
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Find Targets</div>
-            <div class="card-sub">Pick a vertical and city. We'll build the exact Claude prompt to find businesses that need a receptionist.</div>
+            <div class="card-sub">Pick a vertical and city. Claude will find real businesses that need a receptionist.</div>
           </div>
         </div>
         <div class="fg">
@@ -215,7 +205,7 @@ tr:hover td{background:#FAFAF8;}
           <input type="text" id="pfCity" placeholder="e.g. Houston TX" value="Houston TX">
         </div>
         <div class="fg">
-          <label>Pain Signal (optional)</label>
+          <label>Pain Signal</label>
           <select id="pfPain">
             <option value="missed">Missed calls / No answer</option>
             <option value="reviews">Bad reviews mentioning front desk</option>
@@ -225,14 +215,20 @@ tr:hover td{background:#FAFAF8;}
           </select>
         </div>
         <div class="fg">
-          <label>Number of prospects to find</label>
+          <label>Number of prospects</label>
           <select id="pfCount">
             <option value="10">10</option>
             <option value="20" selected>20</option>
             <option value="50">50</option>
           </select>
         </div>
-        <button class="btn btn-primary" onclick="generateProspectPrompt()">Generate Claude Prompt</button>
+        <div class="flex">
+          <button class="btn btn-primary" id="runClaudeBtn" onclick="runClaudeFinder()">
+            <span id="btnText">Run Claude Finder</span>
+          </button>
+          <button class="btn btn-outline" onclick="generateProspectPrompt()">Manual Prompt</button>
+        </div>
+        <div id="finderStatus" style="margin-top:12px;font-size:13px;"></div>
       </div>
 
       <div class="card">
@@ -247,8 +243,8 @@ tr:hover td{background:#FAFAF8;}
             <span>3 Human Receptionists</span>
             <span class="mono">~$9,600/mo</span>
           </div>
-          <div class="cost-bar">
-            <div class="cost-track"><div class="cost-fill human" style="width:100%">$9.6K</div></div>
+          <div style="background:var(--bg);border-radius:4px;height:28px;overflow:hidden;">
+            <div style="background:var(--faint);height:100%;width:100%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:11px;font-weight:600;color:#fff;">$9.6K</div>
           </div>
         </div>
         <div style="margin-bottom:18px;">
@@ -256,8 +252,8 @@ tr:hover td{background:#FAFAF8;}
             <span>5 Human Receptionists</span>
             <span class="mono">~$16,000/mo</span>
           </div>
-          <div class="cost-bar">
-            <div class="cost-track"><div class="cost-fill human" style="width:100%">$16K</div></div>
+          <div style="background:var(--bg);border-radius:4px;height:28px;overflow:hidden;">
+            <div style="background:var(--faint);height:100%;width:100%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:11px;font-weight:600;color:#fff;">$16K</div>
           </div>
         </div>
         <div>
@@ -265,8 +261,8 @@ tr:hover td{background:#FAFAF8;}
             <span>Autoflow AI Receptionist</span>
             <span class="mono">$599/mo</span>
           </div>
-          <div class="cost-bar">
-            <div class="cost-track"><div class="cost-fill" style="width:6%">$599</div></div>
+          <div style="background:var(--bg);border-radius:4px;height:28px;overflow:hidden;">
+            <div style="background:var(--navy);height:100%;width:6%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;">$599</div>
           </div>
         </div>
         <div class="alert alert-info mt-3">
@@ -277,11 +273,25 @@ tr:hover td{background:#FAFAF8;}
       </div>
     </div>
 
+    <div class="card hidden" id="claudeResultsCard">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Claude Found These Prospects</div>
+          <div class="card-sub">Review and edit before adding to your campaign tracker.</div>
+        </div>
+      </div>
+      <div id="claudeResultsList" style="margin-bottom:16px;"></div>
+      <div class="flex">
+        <button class="btn btn-success" onclick="addClaudeResultsToCampaigns()">Add All to Campaigns</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('claudeResultsCard').classList.add('hidden')">Hide</button>
+      </div>
+    </div>
+
     <div class="card hidden" id="prospectPromptCard">
       <div class="card-header">
         <div>
           <div class="card-title">Claude Prompt — Copy & Paste</div>
-          <div class="card-sub">Open Claude.ai (or your API console), paste this, and paste the JSON results back below.</div>
+          <div class="card-sub">Use this if the direct API call fails or you want to run Claude manually.</div>
         </div>
       </div>
       <div class="prompt-box">
@@ -291,7 +301,7 @@ tr:hover td{background:#FAFAF8;}
       </div>
       <div class="fg mt-3">
         <label>Paste Claude's JSON output here</label>
-        <textarea id="prospectResult" rows="6" placeholder='[{"name":"Smith & Associates","type":"Law Firm","phone":"(713) 555-0192","why":"No after-hours answering","angle":"3 paralegals currently splitting front-desk duty"}, ...]'></textarea>
+        <textarea id="prospectResult" rows="6" placeholder='[{"name":"Smith & Associates","email":"info@smithlaw.com"}, ...]'></textarea>
         <small>Paste the exact JSON array Claude returns. The table below will auto-populate.</small>
       </div>
       <div class="flex">
@@ -301,7 +311,6 @@ tr:hover td{background:#FAFAF8;}
     </div>
   </div>
 
-  <!-- PANEL: EMAIL FORGE -->
   <div class="panel" id="panel-email">
     <div class="grid-2">
       <div class="card">
@@ -395,7 +404,6 @@ tr:hover td{background:#FAFAF8;}
     </div>
   </div>
 
-  <!-- PANEL: CAMPAIGNS -->
   <div class="panel" id="panel-campaigns">
     <div class="card">
       <div class="card-header">
@@ -430,7 +438,6 @@ tr:hover td{background:#FAFAF8;}
       </div>
     </div>
 
-    <!-- Add manual prospect -->
     <div class="card">
       <div class="card-title" style="font-size:18px;margin-bottom:16px;">Add Prospect Manually</div>
       <div class="grid-3">
@@ -455,7 +462,6 @@ tr:hover td{background:#FAFAF8;}
     </div>
   </div>
 
-  <!-- PANEL: SUBSCRIBERS -->
   <div class="panel" id="panel-subscribers">
     <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
       <div class="stat-card">
@@ -505,7 +511,6 @@ tr:hover td{background:#FAFAF8;}
       </div>
     </div>
 
-    <!-- Add subscriber -->
     <div class="card">
       <div class="card-title" style="font-size:18px;margin-bottom:16px;">Add New Subscriber</div>
       <div class="grid-3">
@@ -552,7 +557,6 @@ tr:hover td{background:#FAFAF8;}
     </div>
   </div>
 
-  <!-- PANEL: SETTINGS -->
   <div class="panel" id="panel-settings">
     <div class="grid-2">
       <div class="card">
@@ -585,15 +589,15 @@ tr:hover td{background:#FAFAF8;}
           <div style="display:flex;gap:14px;">
             <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">1</div>
             <div>
-              <div style="font-weight:600;font-size:14px;">Generate Prompt</div>
-              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Pick a city and industry. The dashboard builds a Claude prompt that finds real businesses and their pain points.</div>
+              <div style="font-weight:600;font-size:14px;">Run Claude Finder</div>
+              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Pick a city and industry. Click "Run Claude Finder" — the backend calls Anthropic and returns real businesses with emails.</div>
             </div>
           </div>
           <div style="display:flex;gap:14px;">
             <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">2</div>
             <div>
-              <div style="font-weight:600;font-size:14px;">Run in Claude</div>
-              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Copy the prompt, open Claude.ai, paste it, and copy the JSON results back into the dashboard.</div>
+              <div style="font-weight:600;font-size:14px;">Review & Add</div>
+              <div style="font-size:13px;color:var(--mid);margin-top:2px;">Claude's results appear in a preview. Edit any entry, then click "Add All to Campaigns" to save them locally.</div>
             </div>
           </div>
           <div style="display:flex;gap:14px;">
@@ -610,7 +614,6 @@ tr:hover td{background:#FAFAF8;}
 
 </div>
 
-<!-- EDIT MODAL -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
     <div class="modal-header">
@@ -645,7 +648,6 @@ tr:hover td{background:#FAFAF8;}
   </div>
 </div>
 
-<!-- SUBSCRIBER EDIT MODAL -->
 <div class="modal-overlay" id="subEditModal">
   <div class="modal">
     <div class="modal-header">
@@ -685,12 +687,11 @@ tr:hover td{background:#FAFAF8;}
 </div>
 
 <script>
-/* STATE */
 var campaigns = JSON.parse(localStorage.getItem('af_campaigns') || '[]');
 var subscribers = JSON.parse(localStorage.getItem('af_subscribers') || '[]');
 var settings = JSON.parse(localStorage.getItem('af_settings') || '{}');
+var claudeResults = [];
 
-/* INIT */
 document.addEventListener('DOMContentLoaded', function(){
   if(settings.userName) document.getElementById('userName').value = settings.userName;
   if(settings.userEmail) document.getElementById('userEmail').value = settings.userEmail;
@@ -702,10 +703,9 @@ document.addEventListener('DOMContentLoaded', function(){
   populateEmailSelect();
 });
 
-/* TABS */
 function switchTab(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
   event.target.classList.add('active');
   document.getElementById('panel-'+id).classList.add('active');
   if(id==='campaigns'){renderCampaigns();updateStats();}
@@ -713,7 +713,6 @@ function switchTab(id){
   if(id==='email')populateEmailSelect();
 }
 
-/* SETTINGS */
 function saveSettings(){
   settings.userName = document.getElementById('userName').value.trim();
   settings.userEmail = document.getElementById('userEmail').value.trim();
@@ -723,13 +722,105 @@ function saveSettings(){
   setTimeout(function(){el.style.display='none';}, 2000);
 }
 
-/* PROSPECT PROMPT GENERATOR */
+function runClaudeFinder(){
+  var industry = document.getElementById('pfIndustry').value;
+  var city = document.getElementById('pfCity').value.trim() || 'Houston TX';
+  var pain = document.getElementById('pfPain').value;
+  var count = document.getElementById('pfCount').value;
+  var btn = document.getElementById('runClaudeBtn');
+  var btnText = document.getElementById('btnText');
+  var status = document.getElementById('finderStatus');
+
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="spinner"></span> Claude is researching...';
+  status.innerHTML = '<span style="color:var(--faint);">Calling Claude API... this takes 10-30 seconds.</span>';
+  claudeResults = [];
+
+  fetch('/api/prospects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ industry: industry, city: city, pain: pain, count: parseInt(count) })
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    btn.disabled = false;
+    btnText.innerHTML = 'Run Claude Finder';
+
+    if(data.error){
+      status.innerHTML = '<span style="color:var(--danger);">Error: ' + esc(data.error) + '</span>';
+      return;
+    }
+
+    if(!data.prospects || data.prospects.length === 0){
+      status.innerHTML = '<span style="color:var(--warning);">No prospects found. Try different criteria.</span>';
+      return;
+    }
+
+    claudeResults = data.prospects.map(function(p){
+      return {
+        name: p.name || 'Unknown Business',
+        email: p.email || '',
+        type: p.type || 'Business',
+        why: p.why || '',
+        angle: p.angle || ''
+      };
+    });
+
+    var html = '';
+    claudeResults.forEach(function(p, i){
+      html += '<div class="result-preview">' +
+        '<h4>' + (i+1) + '. ' + esc(p.name) + '</h4>' +
+        '<p><strong>Email:</strong> ' + esc(p.email) + '</p>' +
+        '<p><strong>Type:</strong> ' + esc(p.type) + '</p>' +
+        (p.why ? '<p><strong>Why:</strong> ' + esc(p.why) + '</p>' : '') +
+        (p.angle ? '<p><strong>Angle:</strong> ' + esc(p.angle) + '</p>' : '') +
+        '</div>';
+    });
+
+    document.getElementById('claudeResultsList').innerHTML = html;
+    document.getElementById('claudeResultsCard').classList.remove('hidden');
+    document.getElementById('claudeResultsCard').scrollIntoView({behavior:'smooth'});
+    status.innerHTML = '<span style="color:var(--success);">✓ Found ' + claudeResults.length + ' prospects. Review below before adding.</span>';
+  })
+  .catch(function(err){
+    btn.disabled = false;
+    btnText.innerHTML = 'Run Claude Finder';
+    status.innerHTML = '<span style="color:var(--danger);">Network error: ' + esc(err.message) + '. Try the Manual Prompt option.</span>';
+  });
+}
+
+function addClaudeResultsToCampaigns(){
+  if(claudeResults.length === 0){alert('No results to add.');return;}
+  var city = document.getElementById('pfCity').value.trim() || 'Houston TX';
+  var added = 0;
+  claudeResults.forEach(function(item){
+    campaigns.push({
+      id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+      name: item.name,
+      type: item.type || 'Business',
+      city: city,
+      angle: item.angle || item.why || '',
+      status: 'pending',
+      emailSent: '',
+      notes: item.email ? 'Email: ' + item.email : '',
+      created: new Date().toISOString()
+    });
+    added++;
+  });
+  saveCampaigns();
+  renderCampaigns();
+  updateStats();
+  populateEmailSelect();
+  document.getElementById('claudeResultsCard').classList.add('hidden');
+  document.getElementById('finderStatus').innerHTML = '<span style="color:var(--success);">✓ Added ' + added + ' prospects to Campaigns.</span>';
+  claudeResults = [];
+}
+
 function generateProspectPrompt(){
   var industry = document.getElementById('pfIndustry').value;
   var city = document.getElementById('pfCity').value.trim() || 'Houston TX';
   var pain = document.getElementById('pfPain').value;
   var count = document.getElementById('pfCount').value;
-  var name = settings.userName || '[Your name]';
 
   var verticals = {
     law:'law firms', dental:'dental offices', medical:'medical practices', hvac:'HVAC and plumbing companies',
@@ -744,22 +835,21 @@ function generateProspectPrompt(){
     cost:'they currently employ 3-5 receptionists and the owner has mentioned staffing costs publicly'
   };
 
-  var prompt = `You are a lead researcher for Autoflow, an AI receptionist company.\n\n` +
-    `Find ${count} real ${verticals[industry]} in ${city} that likely need a 24/7 AI receptionist.\n\n` +
-    `Focus on businesses showing this pain signal: ${pains[pain]}.\n\n` +
-    `For each business, provide ONLY:\n` +
-    `- name (real business name or contact person)\n` +
-    `- email (best guess business email, formatted as info@company.com or similar)\n\n` +
-    `Return ONLY a valid JSON array. No markdown, no explanation. Example:\n` +
-    `[{"name":"River Oaks Dental","email":"info@riveroaksdental.com"},{"name":"Smith Law Firm","email":"contact@smithlaw.com"}]\n\n` +
-    `Make every entry realistic and specific to ${city}.`;
+  var prompt = 'You are a lead researcher for Autoflow, an AI receptionist company.\\n\\n' +
+    'Find ' + count + ' real ' + verticals[industry] + ' in ' + city + ' that likely need a 24/7 AI receptionist.\\n\\n' +
+    'Focus on businesses showing this pain signal: ' + pains[pain] + '.\\n\\n' +
+    'For each business, provide ONLY:\\n' +
+    '- name (real business name or contact person)\\n' +
+    '- email (best guess business email, formatted as info@company.com or similar)\\n\\n' +
+    'Return ONLY a valid JSON array. No markdown, no explanation. Example:\\n' +
+    '[{"name":"River Oaks Dental","email":"info@riveroaksdental.com"},{"name":"Smith Law Firm","email":"contact@smithlaw.com"}]\\n\\n' +
+    'Make every entry realistic and specific to ' + city + '.';
 
   document.getElementById('prospectPromptText').textContent = prompt;
   document.getElementById('prospectPromptCard').classList.remove('hidden');
   document.getElementById('prospectPromptCard').scrollIntoView({behavior:'smooth'});
 }
 
-/* EMAIL PROMPT GENERATOR */
 function generateEmailPrompt(){
   var sel = document.getElementById('efProspect').value;
   var name = document.getElementById('efName').value.trim();
@@ -780,26 +870,25 @@ function generateEmailPrompt(){
     urgent:'Create mild urgency. Mention we are onboarding a limited number of practices in their city this month.'
   };
 
-  var prompt = `Write a cold email to ${name}, a ${type}.\n\n` +
-    `Context: ${angle}\n\n` +
-    `Product: Autoflow — AI receptionist that answers calls 24/7, books appointments, handles FAQs, and speaks English and Spanish. $599/month flat.\n\n` +
-    `Key comparison to weave in: hiring 3 human receptionists costs ~$9,600/month (plus benefits, taxes, turnover). Hiring 5 costs ~$16,000/month. Autoflow is $599.\n\n` +
-    `Tone instruction: ${toneInstructions[tone]}\n\n` +
-    `Requirements:\n` +
-    `- Subject line under 8 words\n` +
-    `- First sentence must reference their specific pain\n` +
-    `- Include the 3-receptionist vs $599 comparison explicitly\n` +
-    `- End with one low-friction CTA (reply, 10-min call, or demo video)\n` +
-    `- Sign off as "${myName}" from Autoflow\n` +
-    `- Total length: 120-160 words\n\n` +
-    `Return ONLY the subject line and body text. No JSON, no markdown headers.`;
+  var prompt = 'Write a cold email to ' + name + ', a ' + type + '.\\n\\n' +
+    'Context: ' + angle + '\\n\\n' +
+    'Product: Autoflow — AI receptionist that answers calls 24/7, books appointments, handles FAQs, and speaks English and Spanish. $599/month flat.\\n\\n' +
+    'Key comparison to weave in: hiring 3 human receptionists costs ~$9,600/month (plus benefits, taxes, turnover). Hiring 5 costs ~$16,000/month. Autoflow is $599.\\n\\n' +
+    'Tone instruction: ' + toneInstructions[tone] + '\\n\\n' +
+    'Requirements:\\n' +
+    '- Subject line under 8 words\\n' +
+    '- First sentence must reference their specific pain\\n' +
+    '- Include the 3-receptionist vs $599 comparison explicitly\\n' +
+    '- End with one low-friction CTA (reply, 10-min call, or demo video)\\n' +
+    '- Sign off as "' + myName + '" from Autoflow\\n' +
+    '- Total length: 120-160 words\\n\\n' +
+    'Return ONLY the subject line and body text. No JSON, no markdown headers.';
 
   document.getElementById('emailPromptText').textContent = prompt;
   document.getElementById('emailPromptCard').classList.remove('hidden');
   document.getElementById('emailPromptCard').scrollIntoView({behavior:'smooth'});
 }
 
-/* PARSE PROSPECTS */
 function parseProspects(){
   var raw = document.getElementById('prospectResult').value.trim();
   if(!raw){alert('Paste Claude\'s JSON first.');return;}
@@ -817,7 +906,7 @@ function parseProspects(){
         angle: item.why || item.angle || '',
         status: 'pending',
         emailSent: '',
-        notes: '',
+        notes: item.email ? 'Email: ' + item.email : '',
         created: new Date().toISOString()
       });
       added++;
@@ -828,10 +917,9 @@ function parseProspects(){
     populateEmailSelect();
     alert('Added ' + added + ' prospects to Campaigns.');
     document.getElementById('prospectResult').value='';
-  }catch(e){alert('Invalid JSON. Make sure you copied the array exactly.\\nError: '+e.message);}
+  }catch(e){alert('Invalid JSON. Make sure you copied the array exactly.\\nError: ' + e.message);}
 }
 
-/* MANUAL ADD */
 function addManual(){
   var name = document.getElementById('manName').value.trim();
   var type = document.getElementById('manType').value.trim();
@@ -853,7 +941,6 @@ function addManual(){
   document.getElementById('manAngle').value='';
 }
 
-/* RENDER TABLE */
 function renderCampaigns(){
   var tbody = document.getElementById('campaignTable');
   var empty = document.getElementById('emptyState');
@@ -863,16 +950,16 @@ function renderCampaigns(){
     var statusClass = 'status-' + c.status;
     var statusText = {pending:'Pending',sent:'Sent',replied:'Replied',booked:'Booked',closed:'Closed'}[c.status] || c.status;
     var emailPreview = c.emailSent ? (c.emailSent.substring(0,60)+'...') : '—';
-    return `<tr>
-      <td><strong style="color:var(--text);">${esc(c.name)}</strong></td>
-      <td>${esc(c.type)}</td>
-      <td>${esc(c.city)}</td>
-      <td style="max-width:220px;font-size:12.5px;">${esc(c.angle)}</td>
-      <td><span class="status ${statusClass}">${statusText}</span></td>
-      <td style="max-width:180px;font-size:12px;color:var(--faint);">${esc(emailPreview)}</td>
-      <td style="max-width:180px;font-size:12px;color:var(--faint);">${esc(c.notes)}</td>
-      <td><button class="btn btn-sm btn-outline" onclick="openEdit('${c.id}')">Edit</button></td>
-    </tr>`;
+    return '<tr>' +
+      '<td><strong style="color:var(--text);">' + esc(c.name) + '</strong></td>' +
+      '<td>' + esc(c.type) + '</td>' +
+      '<td>' + esc(c.city) + '</td>' +
+      '<td style="max-width:220px;font-size:12.5px;">' + esc(c.angle) + '</td>' +
+      '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
+      '<td style="max-width:180px;font-size:12px;color:var(--faint);">' + esc(emailPreview) + '</td>' +
+      '<td style="max-width:180px;font-size:12px;color:var(--faint);">' + esc(c.notes) + '</td>' +
+      '<td><button class="btn btn-sm btn-outline" onclick="openEdit(\'' + c.id + '\')">Edit</button></td>' +
+    '</tr>';
   }).join('');
 }
 
@@ -887,14 +974,12 @@ function updateStats(){
   document.getElementById('statBooked').textContent = campaigns.filter(function(c){return c.status==='booked';}).length;
 }
 
-/* EMAIL SELECT POPULATE */
 function populateEmailSelect(){
   var sel = document.getElementById('efProspect');
   sel.innerHTML = '<option value="">— Choose from campaigns —</option>' +
-    campaigns.map(function(c){return `<option value="${c.id}">${esc(c.name)} (${c.type})</option>`;}).join('');
+    campaigns.map(function(c){return '<option value="' + c.id + '">' + esc(c.name) + ' (' + esc(c.type) + ')</option>';}).join('');
 }
 
-/* EDIT MODAL */
 function openEdit(id){
   var c = campaigns.find(function(x){return x.id===id;});
   if(!c)return;
@@ -919,7 +1004,6 @@ function saveEdit(){
   }
 }
 
-/* SAVE EMAIL FROM FORGE */
 function saveEmailToProspect(){
   var sel = document.getElementById('efProspect').value;
   var body = document.getElementById('emailResult').value.trim();
@@ -929,7 +1013,6 @@ function saveEmailToProspect(){
   if(c){c.emailSent=body;c.status='sent';saveCampaigns();renderCampaigns();updateStats();alert('Saved to '+c.name);}
 }
 
-/* SUBSCRIBERS */
 function addSubscriber(){
   var name = document.getElementById('subName').value.trim();
   var email = document.getElementById('subEmail').value.trim();
@@ -963,16 +1046,16 @@ function renderSubscribers(){
     var statusClass = 'status-' + s.status;
     var statusText = {active:'Active',paused:'Paused',cancelled:'Cancelled'}[s.status] || s.status;
     var planPrice = {'Reputation Only':'$99','Full Suite':'$599','Enterprise':'Custom'}[s.plan] || '';
-    return `<tr>
-      <td><strong style="color:var(--text);">${esc(s.name)}</strong></td>
-      <td><a href="mailto:${esc(s.email)}" style="color:var(--navy-mid);text-decoration:underline;">${esc(s.email)}</a></td>
-      <td>${esc(s.company)}</td>
-      <td>${esc(s.plan)} <span style="color:var(--faint);font-size:11px;">${planPrice}</span></td>
-      <td><span class="status ${statusClass}">${statusText}</span></td>
-      <td class="mono" style="font-size:12px;">${esc(s.date)}</td>
-      <td style="font-size:12px;color:var(--faint);max-width:180px;">${esc(s.notes)}</td>
-      <td><button class="btn btn-sm btn-outline" onclick="openSubEdit('${s.id}')">Edit</button></td>
-    </tr>`;
+    return '<tr>' +
+      '<td><strong style="color:var(--text);">' + esc(s.name) + '</strong></td>' +
+      '<td><a href="mailto:' + esc(s.email) + '" style="color:var(--navy-mid);text-decoration:underline;">' + esc(s.email) + '</a></td>' +
+      '<td>' + esc(s.company) + '</td>' +
+      '<td>' + esc(s.plan) + ' <span style="color:var(--faint);font-size:11px;">' + planPrice + '</span></td>' +
+      '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
+      '<td class="mono" style="font-size:12px;">' + esc(s.date) + '</td>' +
+      '<td style="font-size:12px;color:var(--faint);max-width:180px;">' + esc(s.notes) + '</td>' +
+      '<td><button class="btn btn-sm btn-outline" onclick="openSubEdit(\'' + s.id + '\')">Edit</button></td>' +
+    '</tr>';
   }).join('');
 }
 
@@ -991,8 +1074,8 @@ function updateSubStats(){
 function exportSubCSV(){
   if(subscribers.length===0){alert('No subscribers to export.');return;}
   var headers = ['Name','Email','Company','Plan','Status','StartDate','Notes'];
-  var rows = subscribers.map(function(s){return [s.name,s.email,s.company,s.plan,s.status,s.date,(s.notes||'').replace(/\\n/g,' ')];});
-  var csv = [headers].concat(rows).map(function(r){return r.map(function(f){return '"'+String(f).replace(/"/g,'""')+'"';}).join(',');}).join('\\n');
+  var rows = subscribers.map(function(s){return [s.name,s.email,s.company,s.plan,s.status,s.date,(s.notes||'').replace(/\n/g,' ')];});
+  var csv = [headers].concat(rows).map(function(r){return r.map(function(f){return '"' + String(f).replace(/"/g,'""') + '"';}).join(',');}).join('\n');
   var blob = new Blob([csv],{type:'text/csv'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1006,7 +1089,6 @@ function clearSubs(){
   }
 }
 
-/* SUBSCRIBER EDIT MODAL */
 function openSubEdit(id){
   var s = subscribers.find(function(x){return x.id===id;});
   if(!s)return;
@@ -1031,7 +1113,6 @@ function saveSubEdit(){
   }
 }
 
-/* UTILS */
 function copyPrompt(id){
   var text = document.getElementById(id).textContent;
   navigator.clipboard.writeText(text).then(function(){alert('Copied to clipboard. Open Claude.ai and paste.');});
@@ -1043,8 +1124,8 @@ function copyTemplate(btn){
 function exportCSV(){
   if(campaigns.length===0){alert('No data to export.');return;}
   var headers = ['Name','Type','City','Angle','Status','EmailSent','Notes','Created'];
-  var rows = campaigns.map(function(c){return [c.name,c.type,c.city,c.angle,c.status,(c.emailSent||'').replace(/\\n/g,' '),(c.notes||'').replace(/\\n/g,' '),c.created];});
-  var csv = [headers].concat(rows).map(function(r){return r.map(function(f){return '"'+String(f).replace(/"/g,'""')+'"';}).join(',');}).join('\\n');
+  var rows = campaigns.map(function(c){return [c.name,c.type,c.city,c.angle,c.status,(c.emailSent||'').replace(/\n/g,' '),(c.notes||'').replace(/\n/g,' '),c.created];});
+  var csv = [headers].concat(rows).map(function(r){return r.map(function(f){return '"' + String(f).replace(/"/g,'""') + '"';}).join(',');}).join('\n');
   var blob = new Blob([csv],{type:'text/csv'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1058,10 +1139,4 @@ function clearAll(){
 }
 </script>
 </body>
-</html>'''
-
-with open('/mnt/agents/output/admin.html', 'w') as f:
-    f.write(admin_html)
-
-print("admin.html updated successfully")
-print(f"File size: {len(admin_html)} characters")
+</html>
