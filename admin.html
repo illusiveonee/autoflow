@@ -54,7 +54,9 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:16p
 .stat-change.up{color:#059669;}
 .stat-change.down{color:var(--red);}
 
-.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:24px;}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+@media(max-width:800px){.chart-row{grid-template-columns:1fr;}}
+.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;}
 .chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
 .chart-title{font-size:14px;font-weight:700;color:var(--mid);letter-spacing:.05em;text-transform:uppercase;}
 
@@ -95,6 +97,7 @@ tr:hover td{background:#FAFAF8;}
 .subscriber-status{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;background:var(--teal-light);color:var(--teal);}
 .subscriber-status.cancelled{background:var(--red-bg);color:var(--red);}
 .subscriber-amount{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.subscriber-new{background:#F59E0B;color:#fff;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-left:8px;text-transform:uppercase;}
 
 .scan-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;z-index:200;display:none;align-items:center;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.2);}
 .scan-toast.show{display:flex;}
@@ -176,11 +179,31 @@ footer a:hover{text-decoration:underline;}
       </div>
     </div>
 
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Revenue Growth</div>
+    <!-- Two charts side by side -->
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Revenue History (last 12 months)</div>
+        </div>
+        <canvas id="revenueChart" height="120"></canvas>
       </div>
-      <canvas id="revenueChart" height="100"></canvas>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Prospect Discovery (last 30 days)</div>
+        </div>
+        <canvas id="prospectChart" height="120"></canvas>
+      </div>
+    </div>
+
+    <!-- Real-time subscription feed -->
+    <div class="chart-card" style="margin-bottom:24px;">
+      <div class="chart-header">
+        <div class="chart-title">📢 Recent Subscriptions (Live)</div>
+        <span style="font-size:12px;color:var(--faint);">updates every 30s</span>
+      </div>
+      <div id="subscriptionFeed" style="max-height:200px;overflow-y:auto;">
+        <div class="empty-state">No subscriptions yet.</div>
+      </div>
     </div>
 
     <div class="finder-panel">
@@ -223,7 +246,7 @@ footer a:hover{text-decoration:underline;}
         <div class="table-title">All Prospects</div>
         <div class="table-actions">
           <button class="btn-sm btn-danger-sm" onclick="clearAllProspects()">Clear All</button>
-          <button class="btn-primary-sm" onclick="openAddModal()">+ Find More</button>
+          <button class="btn-primary-sm" onclick="openAddModal()">+ Add Prospect</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
@@ -239,7 +262,7 @@ footer a:hover{text-decoration:underline;}
             </tr>
           </thead>
           <tbody id="prospectsTableBody">
-            <tr><td colspan="6" class="empty-state">No prospects yet. Use the Claude AI Finder above to discover leads.</td></tr>
+            <tr><td colspan="6" class="empty-state">Loading prospects...</td></tr>
           </tbody>
         </table>
       </div>
@@ -262,12 +285,12 @@ footer a:hover{text-decoration:underline;}
       </div>
     </div>
     <div id="subscribersList">
-      <div class="empty-state">No subscribers yet. When someone pays via Stripe, they'll appear here automatically.</div>
+      <div class="empty-state">Loading subscribers...</div>
     </div>
   </div>
 
   <div id="tab-clients" class="tab-content">
-    <div class="empty-state">Client management coming soon. Convert prospects to clients here.</div>
+    <div class="empty-state">Client management coming soon.</div>
   </div>
 
   <footer>
@@ -299,7 +322,9 @@ footer a:hover{text-decoration:underline;}
 
 <script>
 const ADMIN_PASSWORD = 'autoflow2026';
+const API_BASE = '/api';
 
+// ─── LOGIN ───
 function doLogin(){
   const pw = document.getElementById('adminPassword').value;
   if(pw === ADMIN_PASSWORD){
@@ -320,74 +345,36 @@ if(localStorage.getItem('af_admin_auth')==='1'){
   document.getElementById('app').style.display='block';
 }
 
-const STORAGE_KEY = 'af_prospects_v2';
-const SUBS_KEY = 'af_subscribers_v2';
-const EMAILS_KEY = 'af_emails_sent';
-
-function getProspects(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[];}catch(e){return [];}
-}
-function setProspects(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr));}
-function getSubscribers(){
-  try{return JSON.parse(localStorage.getItem(SUBS_KEY))||[];}catch(e){return [];}
-}
-function setSubscribers(arr){localStorage.setItem(SUBS_KEY,JSON.stringify(arr));}
-function getEmailsSent(){
-  try{return parseInt(localStorage.getItem(EMAILS_KEY))||0;}catch(e){return 0;}
-}
-function addEmailsSent(n){localStorage.setItem(EMAILS_KEY,(getEmailsSent()+n).toString());}
-
+// ─── TAB SWITCH ───
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
-  if(name==='prospects') renderProspects();
-  if(name==='subscribers') renderSubscribers();
+  if(name==='prospects') fetchProspects();
+  if(name==='subscribers') fetchSubscribers();
 }
 
-function updateStats(){
-  const prospects = getProspects();
-  const subscribers = getSubscribers();
-  const emails = getEmailsSent();
-  const activeSubs = subscribers.filter(s=>s.status==='active');
-  const mrr = activeSubs.reduce((sum,s)=>sum+(s.amount||0),0);
+// ─── CHARTS ───
+let revChart, prospectChart;
 
-  document.getElementById('statMrr').textContent = '$'+mrr.toLocaleString();
-  document.getElementById('statSubs').textContent = activeSubs.length;
-  document.getElementById('statProspects').textContent = prospects.length;
-  document.getElementById('statEmails').textContent = emails;
-
-  document.getElementById('subActiveCount').textContent = activeSubs.length;
-  document.getElementById('subMrrTotal').textContent = '$'+mrr.toLocaleString();
-  document.getElementById('subCancelledCount').textContent = subscribers.filter(s=>s.status==='cancelled').length;
-}
-
-let revChart;
-function initChart(){
-  const ctx = document.getElementById('revenueChart').getContext('2d');
-  const subs = getSubscribers();
-  const months = ['Jan','Feb','Mar','Apr','May','Jun'];
-  const data = months.map((_,i)=>{
-    return subs.filter(s=>{
-      const d = new Date(s.created);
-      return d.getMonth()===i && s.status==='active';
-    }).reduce((sum,s)=>sum+(s.amount||0),0);
-  });
+function initCharts(stats){
+  // Revenue chart
+  const ctxRev = document.getElementById('revenueChart').getContext('2d');
   if(revChart) revChart.destroy();
-  revChart = new Chart(ctx,{
-    type:'line',
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const revData = stats?.revenueHistory || new Array(12).fill(0);
+  revChart = new Chart(ctxRev, {
+    type:'bar',
     data:{
       labels:months,
       datasets:[{
         label:'MRR ($)',
-        data:data,
+        data:revData,
+        backgroundColor:'rgba(13,148,136,0.6)',
         borderColor:'#0D9488',
-        backgroundColor:'rgba(13,148,136,0.08)',
-        fill:true,
-        tension:.4,
-        pointRadius:4,
-        pointBackgroundColor:'#0D9488'
+        borderWidth:1,
+        borderRadius:4
       }]
     },
     options:{
@@ -395,17 +382,111 @@ function initChart(){
       maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{
-        y:{beginAtZero:true,grid:{color:'#E2DDD6'},ticks:{font:{size:11},color:'#94A3B8'}},
-        x:{grid:{display:false},ticks:{font:{size:11},color:'#94A3B8'}}
+        y:{beginAtZero:true,grid:{color:'#E2DDD6'},ticks:{font:{size:10},color:'#94A3B8'}},
+        x:{grid:{display:false},ticks:{font:{size:10},color:'#94A3B8'}}
+      }
+    }
+  });
+
+  // Prospect discovery chart
+  const ctxPro = document.getElementById('prospectChart').getContext('2d');
+  if(prospectChart) prospectChart.destroy();
+  const hist = stats?.prospectHistory || Array.from({length:30}, () => ({date:'', count:0}));
+  const labels = hist.map(d => d.date.slice(5)); // MM-DD
+  const counts = hist.map(d => d.count);
+  prospectChart = new Chart(ctxPro, {
+    type:'line',
+    data:{
+      labels:labels,
+      datasets:[{
+        label:'New prospects',
+        data:counts,
+        borderColor:'#0F2744',
+        backgroundColor:'rgba(15,39,68,0.08)',
+        fill:true,
+        tension:.3,
+        pointRadius:3,
+        pointBackgroundColor:'#0F2744'
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,grid:{color:'#E2DDD6'},ticks:{font:{size:10},color:'#94A3B8'}},
+        x:{grid:{display:false},ticks:{font:{size:8},color:'#94A3B8',maxRotation:45}}
       }
     }
   });
 }
 
-function renderProspects(){
-  const prospects = getProspects();
+// ─── SUBSCRIPTION FEED ───
+function renderSubscriptionFeed(subscribers){
+  const feed = document.getElementById('subscriptionFeed');
+  if(!subscribers || subscribers.length===0){
+    feed.innerHTML = '<div class="empty-state">No subscriptions yet.</div>';
+    return;
+  }
+  // Show newest first
+  const sorted = [...subscribers].sort((a,b) => new Date(b.created) - new Date(a.created));
+  const recent = sorted.slice(0,10); // latest 10
+  feed.innerHTML = recent.map(s => {
+    const isNew = new Date(s.created) > new Date(Date.now() - 60000); // within 1 min
+    return `
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;">
+        <div>
+          <strong>${escapeHtml(s.email)}</strong>
+          ${isNew ? '<span class="subscriber-new">NEW</span>' : ''}
+          <span style="color:var(--faint);margin-left:8px;">${s.plan}</span>
+        </div>
+        <div>
+          <span style="font-weight:600;">$${s.amount||0}/mo</span>
+          <span style="color:var(--faint);font-size:11px;margin-left:12px;">${new Date(s.created).toLocaleString()}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── FETCH DATA ───
+let lastFetchedSubscribers = [];
+
+async function fetchStats(){
+  try {
+    const res = await fetch(API_BASE+'/stats');
+    if(!res.ok) throw new Error('Failed to fetch stats');
+    const data = await res.json();
+    document.getElementById('statMrr').textContent = '$'+data.mrr.toLocaleString();
+    document.getElementById('statSubs').textContent = data.subscribers;
+    document.getElementById('statProspects').textContent = data.prospects;
+    document.getElementById('statEmails').textContent = data.emailsSent || 0;
+    document.getElementById('subActiveCount').textContent = data.subscribers;
+    document.getElementById('subMrrTotal').textContent = '$'+data.mrr.toLocaleString();
+    // Update chart
+    initCharts(data);
+    return data;
+  } catch(e){
+    console.error(e);
+    return null;
+  }
+}
+
+async function fetchProspects(){
+  try {
+    const res = await fetch(API_BASE+'/prospects');
+    if(!res.ok) throw new Error('Failed to fetch prospects');
+    const data = await res.json();
+    renderProspects(data.prospects || []);
+  } catch(e){
+    console.error(e);
+    document.getElementById('prospectsTableBody').innerHTML = '<tr><td colspan="6" class="empty-state">Error loading prospects.</td></tr>';
+  }
+}
+
+function renderProspects(prospects){
   const tbody = document.getElementById('prospectsTableBody');
-  if(prospects.length===0){
+  if(!prospects || prospects.length===0){
     tbody.innerHTML='<tr><td colspan="6" class="empty-state">No prospects yet. Use the Claude AI Finder to discover leads.</td></tr>';
     return;
   }
@@ -418,21 +499,32 @@ function renderProspects(){
       <td class="email-cell">${p.email?`<a href="mailto:${escapeHtml(p.email)}">${escapeHtml(p.email)}</a>`:'—'}</td>
       <td>
         <button class="btn-sm" style="padding:4px 10px;font-size:11px;" onclick="copyEmail('${escapeHtml(p.email||'')}')">Copy</button>
-        <button class="btn-sm btn-danger-sm" style="padding:4px 10px;font-size:11px;" onclick="deleteProspect(${i})">×</button>
       </td>
     </tr>
   `).join('');
 }
-function escapeHtml(t){return(t||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function copyEmail(email){if(!email)return;navigator.clipboard.writeText(email).then(()=>showToast('Email copied'));}
-function deleteProspect(i){const p=getProspects();p.splice(i,1);setProspects(p);renderProspects();updateStats();}
-function clearAllProspects(){if(!confirm('Clear all prospects?'))return;setProspects([]);renderProspects();updateStats();}
 
-function renderSubscribers(){
-  const subs = getSubscribers();
+async function fetchSubscribers(){
+  try {
+    const res = await fetch(API_BASE+'/subscribers');
+    if(!res.ok) throw new Error('Failed to fetch subscribers');
+    const data = await res.json();
+    const subs = data.subscribers || [];
+    renderSubscribers(subs);
+    renderSubscriptionFeed(subs);
+    const cancelled = subs.filter(s=>s.status==='cancelled').length;
+    document.getElementById('subCancelledCount').textContent = cancelled;
+    lastFetchedSubscribers = subs;
+  } catch(e){
+    console.error(e);
+    document.getElementById('subscribersList').innerHTML = '<div class="empty-state">Error loading subscribers.</div>';
+  }
+}
+
+function renderSubscribers(subs){
   const container = document.getElementById('subscribersList');
-  if(subs.length===0){
-    container.innerHTML='<div class="empty-state">No subscribers yet. When someone pays via Stripe, they\'ll appear here automatically.</div>';
+  if(!subs || subs.length===0){
+    container.innerHTML='<div class="empty-state">No subscribers yet. When someone pays via Stripe, they\'ll appear here.</div>';
     return;
   }
   container.innerHTML = subs.map(s=>`
@@ -449,6 +541,7 @@ function renderSubscribers(){
   `).join('');
 }
 
+// ─── CLAUDE FINDER ───
 async function runClaudeFinder(){
   const industry = document.getElementById('finderIndustry').value;
   const city = document.getElementById('finderCity').value.trim();
@@ -463,66 +556,89 @@ async function runClaudeFinder(){
 
   btn.disabled=true;btn.innerHTML='<span>⏳</span> Finding prospects...';
   try{
-    const res = await fetch('/api/prospects',{
+    const res = await fetch(API_BASE+'/prospects',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({industry,city,pain,count})
     });
-    if(!res.ok){
-      const txt = await res.text();
-      throw new Error('Backend error: '+txt);
-    }
     const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    if(!data.prospects||!data.prospects.length) throw new Error('No prospects found. Try different search terms.');
-
-    const existing = getProspects();
-    const merged = [...existing,...data.prospects];
-    setProspects(merged);
-    updateStats();
-    succ.textContent = `Found ${data.prospects.length} prospects! Total: ${merged.length}`;
+    if(!res.ok) throw new Error(data.error || 'Unknown error');
+    succ.textContent = `Found ${data.count} prospects! Total updated.`;
     succ.style.display='block';
-    showToast(`Scan city: {"city":"${city}","found":${data.prospects.length},"added":${data.prospects.length}}`);
-    if(document.getElementById('tab-prospects').classList.contains('active')) renderProspects();
+    showToast(`Found ${data.count} new prospects`);
+    fetchProspects();
+    fetchStats();
   }catch(e){
-    console.error(e);
-    err.innerHTML = `<b>Error:</b> ${escapeHtml(e.message)}<br><small>Make sure your /api/prospects endpoint is deployed and ANTHROPIC_API_KEY is set in Vercel Environment Variables.</small>`;
+    err.innerHTML = `<b>Error:</b> ${escapeHtml(e.message)}<br><small>Check Vercel logs and ensure ANTHROPIC_API_KEY is set.</small>`;
     err.style.display='block';
   }
   btn.disabled=false;btn.innerHTML='<span>🔍</span> Find Prospects with Claude';
 }
 
+// ─── ADD PROSPECT (manually) ───
 function openAddModal(){document.getElementById('addModal').classList.add('show');}
 function closeAddModal(){document.getElementById('addModal').classList.remove('show');}
-function saveProspect(){
+async function saveProspect(){
   const p = {
     name: document.getElementById('addName').value.trim(),
     city: document.getElementById('addCity').value.trim(),
     rating: document.getElementById('addRating').value.trim(),
     pain: parseInt(document.getElementById('addPain').value)||0,
-    email: document.getElementById('addEmail').value.trim(),
-    added: new Date().toISOString()
+    email: document.getElementById('addEmail').value.trim()
   };
   if(!p.name){alert('Business name required');return;}
-  const arr = getProspects(); arr.push(p); setProspects(arr);
-  closeAddModal(); renderProspects(); updateStats();
-  document.querySelectorAll('#addModal input').forEach(i=>i.value='');
+  try {
+    const res = await fetch(API_BASE+'/prospects',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...p, manual:true})
+    });
+    if(!res.ok) throw new Error('Failed to save');
+    closeAddModal();
+    document.querySelectorAll('#addModal input').forEach(i=>i.value='');
+    fetchProspects();
+    fetchStats();
+    showToast('Prospect added');
+  } catch(e){
+    alert('Error: '+e.message);
+  }
 }
 
-function exportCSV(){
-  const prospects = getProspects();
-  if(!prospects.length){alert('No prospects to export');return;}
-  let csv = 'Business,City,Rating,Pain Score,Email\n';
-  prospects.forEach(p=>{
-    csv += `"${(p.name||'').replace(/"/g,'""')}","${(p.city||'').replace(/"/g,'""')}",${p.rating||''},${p.pain||0},"${p.email||''}"\n`;
-  });
-  const blob = new Blob([csv],{type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url; a.download='autoflow-prospects.csv'; a.click();
-  URL.revokeObjectURL(url);
+// ─── CLEAR PROSPECTS ───
+async function clearAllProspects(){
+  if(!confirm('Clear all prospects? This cannot be undone.')) return;
+  try {
+    await fetch(API_BASE+'/prospects',{method:'DELETE'});
+    fetchProspects();
+    fetchStats();
+    showToast('All prospects cleared');
+  } catch(e){
+    alert('Error: '+e.message);
+  }
 }
 
+// ─── EXPORT CSV ───
+async function exportCSV(){
+  try {
+    const res = await fetch(API_BASE+'/prospects');
+    const data = await res.json();
+    const prospects = data.prospects || [];
+    if(!prospects.length){alert('No prospects to export');return;}
+    let csv = 'Business,City,Rating,Pain Score,Email\n';
+    prospects.forEach(p=>{
+      csv += `"${(p.name||'').replace(/"/g,'""')}","${(p.city||'').replace(/"/g,'""')}",${p.rating||''},${p.pain||0},"${p.email||''}"\n`;
+    });
+    const blob = new Blob([csv],{type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='autoflow-prospects.csv'; a.click();
+    URL.revokeObjectURL(url);
+  } catch(e){alert('Export error: '+e.message);}
+}
+
+// ─── HELPERS ───
+function escapeHtml(t){return(t||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function copyEmail(email){if(!email)return;navigator.clipboard.writeText(email).then(()=>showToast('Email copied'));}
 function showToast(text){
   const t = document.getElementById('scanToast');
   document.getElementById('scanToastText').textContent = text;
@@ -530,20 +646,18 @@ function showToast(text){
   setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-function addSubscriber(email,plan,amount,status='active'){
-  const subs = getSubscribers();
-  subs.push({email,plan,amount,status,created:new Date().toISOString()});
-  setSubscribers(subs);
-  updateStats();
-  if(document.getElementById('tab-subscribers').classList.contains('active')) renderSubscribers();
-}
-
-function initDashboard(){
-  updateStats();
-  initChart();
-  renderProspects();
-  renderSubscribers();
-  setInterval(()=>{updateStats();initChart();},30000);
+// ─── INIT ───
+async function initDashboard(){
+  const stats = await fetchStats();
+  if(stats) initCharts(stats);
+  await fetchProspects();
+  await fetchSubscribers();
+  // Refresh every 30 seconds
+  setInterval(async () => {
+    const newStats = await fetchStats();
+    if(newStats) initCharts(newStats);
+    await fetchSubscribers(); // updates feed too
+  }, 30000);
 }
 
 if(localStorage.getItem('af_admin_auth')==='1'){
