@@ -12,7 +12,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
 
-/* ─── FIX SHAKING ─── */
 .tab-content { min-height: 400px; }
 .chart-card canvas { max-height: 200px; width: 100% !important; }
 .chart-card { min-height: auto; overflow: hidden; }
@@ -182,7 +181,7 @@ footer a:hover{text-decoration:underline;}
       </div>
     </div>
 
-    <!-- ─── REVENUE CHART (main) ─── -->
+    <!-- ─── REVENUE CHART ─── -->
     <div class="chart-card" style="margin-bottom:24px;min-height:280px;">
       <div class="chart-header">
         <div class="chart-title">Revenue History (last 12 months)</div>
@@ -191,7 +190,7 @@ footer a:hover{text-decoration:underline;}
       <canvas id="revenueChart" height="160"></canvas>
     </div>
 
-    <!-- ─── PROSPECT CHART (secondary) ─── -->
+    <!-- ─── PROSPECT CHART ─── -->
     <div class="chart-card" style="margin-bottom:24px;min-height:200px;">
       <div class="chart-header">
         <div class="chart-title">Prospect Discovery (last 30 days)</div>
@@ -397,7 +396,7 @@ function initCharts(stats){
   const ctxPro = document.getElementById('prospectChart').getContext('2d');
   if(prospectChart) prospectChart.destroy();
   const hist = stats?.prospectHistory || Array.from({length:30}, () => ({date:'', count:0}));
-  const labels = hist.map(d => d.date.slice(5)); // MM-DD
+  const labels = hist.map(d => d.date.slice(5));
   const counts = hist.map(d => d.count);
   prospectChart = new Chart(ctxPro, {
     type:'line',
@@ -476,12 +475,15 @@ async function fetchStats(){
 async function fetchProspects(){
   try {
     const res = await fetch(API_BASE+'/prospects');
-    if(!res.ok) throw new Error('Failed to fetch prospects');
+    if(!res.ok) {
+      const text = await res.text();
+      throw new Error(`HTTP ${res.status}: ${text}`);
+    }
     const data = await res.json();
     renderProspects(data.prospects || []);
   } catch(e){
-    console.error(e);
-    document.getElementById('prospectsTableBody').innerHTML = '<tr><td colspan="6" class="empty-state">Error loading prospects.</td></tr>';
+    console.error('Fetch prospects error:', e);
+    document.getElementById('prospectsTableBody').innerHTML = `<tr><td colspan="6" class="empty-state">Error loading prospects: ${e.message}</td></tr>`;
   }
 }
 
