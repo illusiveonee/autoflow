@@ -188,6 +188,7 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
       <a href="#services" class="nav-hide">Services</a>
       <a href="#how" class="nav-hide">How it works</a>
       <a href="#pricing" class="nav-hide">Pricing</a>
+      <a href="admin.html" class="nav-hide">Admin</a>
       <a href="#pricing" class="nav-cta">Get started</a>
     </div>
   </div>
@@ -210,7 +211,6 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
     </div>
 
     <div class="demo-panels">
-      <!-- Call demo -->
       <div class="demo-panel">
         <div class="demo-header">
           <div class="d-dot" style="background:#F87171"></div>
@@ -221,7 +221,6 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
         </div>
         <div class="call-body" id="callBody"></div>
       </div>
-      <!-- Review demo -->
       <div class="demo-panel">
         <div class="demo-header">
           <div class="d-dot" style="background:#F87171"></div>
@@ -242,14 +241,12 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
 
 </div>
 
-<!-- TICKER -->
 <div class="ticker-wrap">
   <div class="ticker-track" id="tickerTrack"></div>
 </div>
 
 <div class="wrap">
 
-<!-- SERVICES -->
 <section id="services">
   <div class="sec-label">Two services. One platform.</div>
   <h2>Everything a business needs at the front door.</h2>
@@ -285,7 +282,6 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
 <section id="how">
   <div class="sec-label">Customer acquisition</div>
   <h2>How Autoflow finds its own next clients.</h2>
@@ -318,7 +314,6 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
   </div>
 </section>
 
-<!-- PRICING -->
 <section id="pricing">
   <div class="sec-label">Pricing</div>
   <h2>Start with one service. Add the other when it pays for itself.</h2>
@@ -371,13 +366,12 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
   <div class="pay-row">PAYMENT — visa / mastercard / amex / usdc · btc / eth / usdt (coingate)</div>
 </section>
 
-<!-- CONTACT -->
 <section id="contact">
   <div class="sec-label">Get in touch</div>
   <h2>Enterprise & custom pricing.</h2>
   <p class="sec-sub">For chains, franchises, and regional operators with 5+ locations. We'll reply within 24 hours.</p>
   <div class="contact-box">
-    <form action="https://formsubmit.co/autoflowicu@protonmail.com" method="POST">
+    <form action="https://formsubmit.co/autoflowicu@gmail.com" method="POST">
       <input type="hidden" name="_subject" value="New Autoflow Enterprise Inquiry">
       <input type="hidden" name="_captcha" value="false">
       <input type="hidden" name="_next" value="https://autoflow.icu/thanks">
@@ -397,7 +391,7 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
   <div class="foot-logo">Autoflow</div>
   <div class="foot-right">© 2026 · Not affiliated with any review platform · Results vary by business</div>
   <div class="foot-contact">
-    <a href="mailto:autoflowicu@protonmail.com">autoflowicu@protonmail.com</a>
+    <a href="mailto:autoflowicu@gmail.com">autoflowicu@gmail.com</a>
     <a href="tel:+14087594429">+1 408-759-4429</a>
   </div>
 </footer>
@@ -405,16 +399,13 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
 </div>
 
 <script>
-// TICKER
 var inds=['Dental Offices','Law Firms','Auto Dealerships','Restaurants','Medical Practices','Real Estate Agencies','Hotels & Motels','Barbershops & Salons','Veterinary Clinics','HVAC & Plumbing','Gyms & Fitness Studios','Optometrists','Chiropractors','Accounting Firms','Physical Therapy','Spas & MedSpas','Roofing Companies','Pest Control','Urgent Care Centers','Mortgage Brokers','Insurance Agencies','Home Inspectors','Car Washes','Landscaping Companies','Flooring & Tile'];
 var tr=document.getElementById('tickerTrack');
 tr.innerHTML=inds.concat(inds).map(function(i){return'<div class="tick-item">'+i+'</div>';}).join('');
 
-// CITIES
 var cities=['Houston TX','New York NY','Los Angeles CA','Chicago IL','Phoenix AZ','Philadelphia PA','San Antonio TX','San Diego CA','Dallas TX','San Jose CA','Austin TX','Jacksonville FL','Fort Worth TX','Columbus OH','Charlotte NC','Indianapolis IN','San Francisco CA','Seattle WA','Denver CO','Nashville TN','Oklahoma City OK','El Paso TX','Las Vegas NV','Louisville KY','Memphis TN','Portland OR','Baltimore MD','Milwaukee WI','Albuquerque NM','Tucson AZ','Fresno CA','Sacramento CA','Mesa AZ','Kansas City MO','Atlanta GA','Omaha NE','Colorado Springs CO','Raleigh NC','Miami FL','Virginia Beach VA','Long Beach CA','Minneapolis MN','Tampa FL','New Orleans LA','Arlington TX','Bakersfield CA','Honolulu HI','Anaheim CA','Aurora CO','Santa Ana CA'];
 document.getElementById('citiesGrid').innerHTML=cities.map(function(c){return'<div class="city-chip"><span class="cdot"></span>'+c+'</div>';}).join('');
 
-// CALL DEMO
 var script=[
   {cls:'cl-sys', t:'[Incoming call — Dr. Patel Dental Group — 11:43 AM]'},
   {cls:'cl-ai',  t:"AI: Thank you for calling Dr. Patel's office. How can I help?"},
@@ -441,7 +432,6 @@ function runCall(){
 }
 runCall();
 
-// REVIEW TYPEWRITER
 var full="Thank you for your feedback. We sincerely apologize for the wait and the experience you had — this is not the standard we hold ourselves to. We'd love the opportunity to make it right. Please reach out directly and we're committed to earning your trust back.";
 var ri=0;
 function typeRev(){
