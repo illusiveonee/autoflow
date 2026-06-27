@@ -2,46 +2,32 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const { industry, city, pain, count } = req.body;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured in Vercel Environment Variables' });
+  const { industry, city, pain, count = 10 } = req.body || {};
+  if (!industry || !city) {
+    return res.status(400).json({ error: 'industry and city required' });
   }
 
-  const verticals = {
-    law: 'law firms',
-    dental: 'dental practices',
-    accounting: 'accounting firms',
-    insurance: 'insurance agencies',
-    real_estate: 'real estate agencies',
-    consulting: 'consulting firms',
-    marketing: 'marketing agencies',
-    tech: 'tech companies'
-  };
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+  }
 
-  const industryName = verticals[industry] || industry;
-  const painContext = pain ? ` that struggle with ${pain}` : '';
+  const prompt = `You are a B2B lead generation researcher. Find ${count} real ${industry} in ${city}.
 
-  const prompt = `Find ${count || 10} real ${industryName} in ${city}${painContext}.
-
-For each business, provide ONLY a JSON object with these exact fields:
-- name: full business name (use real business names)
-- type: specific type of business
+For each business, provide ONLY:
+- name: exact business name
 - city: "${city}"
-- rating: estimated Google rating as a number 1.0-5.0 (use realistic values)
-- pain: estimated pain score 0-100${pain ? ' based on ' + pain : ''} (higher = more pain)
-- email: a realistic business email address. If you know the real email, use it. Otherwise generate a plausible one based on the business name and domain conventions (info@, contact@, hello@, or firstname@ format).
+- rating: estimated Google rating like "4.2" (use realistic values)
+- pain: pain score 0-100 based on online reputation (low rating = high pain)
+- email: a realistic business email address (format: info@, contact@, or name-based)
 
-Return ONLY a valid JSON array. No markdown, no explanation, no code blocks. Just the raw JSON array.
-
-Example format:
+Return ONLY a valid JSON array. No markdown, no explanation, no code blocks. Example:
 [
-  {"name":"Smith & Associates","type":"Law Firm","city":"${city}","rating":4.5,"pain":35,"email":"info@smithlaw.com"}
+  {"name":"Smith & Associates Law Firm","city":"${city}","rating":"4.1","pain":45,"email":"contact@smithlaw.com"},
+  {"name":"Johnson Legal Group","city":"${city}","rating":"3.8","pain":65,"email":"info@johnsonlegal.com"}
 ]`;
 
   try {
@@ -54,42 +40,53 @@ Example format:
       },
       body: JSON.stringify({
         model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 4096,
+        max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(500).json({ error: 'Claude API error: ' + errText });
+      return res.status(502).json({ error: 'Claude API error: ' + errText });
     }
 
     const data = await response.json();
-    const text = data.content?.[0]?.text || '';
+    const content = data.content?.[0]?.text || data.completion || '';
 
-    let prospects = [];
-    const jsonMatch = text.match(/\[[\s\S]*?\]/);
-    if (jsonMatch) {
-      try {
-        prospects = JSON.parse(jsonMatch[0]);
-      } catch (e) {
-        return res.status(500).json({ error: 'Failed to parse Claude response', raw: text });
-      }
+    let jsonStr = content;
+    const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) jsonStr = codeBlockMatch[1];
+    jsonStr = jsonStr.trim();
+
+    const arrayMatch = jsonStr.match(/(\[\s\S]*\])/);
+    if (arrayMatch) jsonStr = arrayMatch[1];
+
+    let prospects;
+    try {
+      prospects = JSON.parse(jsonStr);
+    } catch (e) {
+      const fallback = content.match(/\[[\s\S]*?\]/);
+      if (fallback) prospects = JSON.parse(fallback[0]);
+      else throw new Error('Could not parse Claude response');
     }
 
-    prospects = prospects.filter(p => p.name && p.city).map(p => ({
-      name: p.name,
-      type: p.type || industryName,
-      city: p.city || city,
-      rating: parseFloat(p.rating) || 4.0,
-      pain: parseInt(p.pain) || 30,
-      email: p.email || '',
-      status: 'prospect'
-    }));
+    if (!Array.isArray(prospects)) {
+      return res.status(502).json({ error: 'Invalid response format from Claude' });
+    }
 
-    res.status(200).json({ prospects, count: prospects.length });
+    const cleaned = prospects.map(p => ({
+      name: String(p.name || p.business || 'Unknown').trim(),
+      city: String(p.city || city).trim(),
+      rating: String(p.rating || '').trim(),
+      pain: Math.min(100, Math.max(0, parseInt(p.pain) || 0)),
+      email: String(p.email || '').trim(),
+      added: new Date().toISOString()
+    })).filter(p => p.name && p.name !== 'Unknown');
 
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(200).json({ prospects: cleaned, count: cleaned.length });
+
+  } catch (e) {
+    console.error('Prospects error:', e);
+    return res.status(500).json({ error: e.message || 'Internal server error' });
   }
 }
