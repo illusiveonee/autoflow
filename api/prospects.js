@@ -36,7 +36,8 @@ export default async function handler(req, res) {
       const prospects = (await kv.get('prospects')) || [];
       return res.status(200).json({ prospects });
     } catch (e) {
-      return res.status(500).json({ error: 'KV read error' });
+      console.error('KV GET error:', e.message);
+      return res.status(500).json({ error: 'KV read error: ' + e.message });
     }
   }
 
@@ -46,7 +47,8 @@ export default async function handler(req, res) {
       await updateStats();
       return res.status(200).json({ success: true });
     } catch (e) {
-      return res.status(500).json({ error: 'Delete failed' });
+      console.error('KV DELETE error:', e.message);
+      return res.status(500).json({ error: 'Delete failed: ' + e.message });
     }
   }
 
@@ -74,7 +76,8 @@ export default async function handler(req, res) {
       await updateStats();
       return res.status(200).json({ prospects: [prospect], count: 1 });
     } catch (e) {
-      return res.status(500).json({ error: 'Manual save failed' });
+      console.error('Manual save error:', e.message);
+      return res.status(500).json({ error: 'Manual save failed: ' + e.message });
     }
   }
 
@@ -110,7 +113,7 @@ Example response:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }],
       }),
@@ -119,6 +122,7 @@ Example response:
     const responseText = await response.text();
     
     if (!response.ok) {
+      console.error('Claude API error:', response.status, responseText.substring(0, 500));
       return res.status(500).json({ error: `Claude API ${response.status}: ${responseText.substring(0, 200)}` });
     }
 
