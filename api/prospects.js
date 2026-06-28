@@ -9,10 +9,7 @@ const CORS = {
 
 function extractJSONArray(text) {
   text = text.trim();
-  // Remove markdown fences
   text = text.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
-  
-  // Find outermost array by bracket counting
   let start = -1, depth = 0, inString = false, escape = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
@@ -113,7 +110,7 @@ Example response:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }],
       }),
@@ -140,7 +137,6 @@ Example response:
     try {
       parsed = JSON.parse(jsonStr);
     } catch (e) {
-      // Try cleanup
       const cleaned = jsonStr.replace(/,\s*]/g, ']').replace(/,\s*}/g, '}');
       parsed = JSON.parse(cleaned);
     }
@@ -165,7 +161,6 @@ Example response:
       return res.status(500).json({ error: 'Claude returned data but no valid prospects with emails', raw: content.substring(0, 500) });
     }
 
-    // Save to KV
     const existing = (await kv.get('prospects')) || [];
     const existingEmails = new Set(existing.map(p => p.email.toLowerCase()));
     const existingNames = new Set(existing.map(p => (p.name + '|' + p.city).toLowerCase()));
