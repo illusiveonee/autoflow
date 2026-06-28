@@ -231,7 +231,6 @@
     }
     .refresh-btn:active { opacity: 0.7; }
     
-    /* REVENUE GROWTH CHART */
     .revenue-chart {
       position: relative;
       height: 220px;
@@ -510,7 +509,6 @@
       color: #555;
     }
     
-    /* EMAIL FOOTER */
     .email-footer {
       text-align: center;
       padding: 20px;
@@ -599,7 +597,6 @@
       </div>
     </div>
     
-    <!-- REVENUE GROWTH CHART -->
     <div class="section-card">
       <div class="section-title">
         <span>📈 Revenue Growth</span>
@@ -634,7 +631,6 @@
       </div>
     </div>
     
-    <!-- QUICK ACTIONS -->
     <div class="section-card">
       <div class="section-title">⚡ Quick Actions</div>
       <div class="quick-actions">
@@ -657,7 +653,6 @@
       </div>
     </div>
     
-    <!-- EMAIL FOOTER -->
     <div class="email-footer">
       Questions? Email us at <a href="mailto:autoflowicu@gmail.com">autoflowicu@gmail.com</a>
     </div>
@@ -816,9 +811,15 @@
   </div>
 </div>
 
-</div><!-- /app -->
+</div>
 
 <script>
+// ============================================
+// CHANGE YOUR PASSWORD HERE
+// Edit the text between the quotes to whatever you want
+// ============================================
+const ADMIN_PASSWORD = "YOUR_PASSWORD_HERE";
+
 let currentProspects = [];
 let currentSubscribers = [];
 let isLoggedIn = false;
@@ -834,7 +835,7 @@ function showApp() {
   loadStats();
 }
 
-async function doLogin() {
+function doLogin() {
   const password = document.getElementById('login-password').value.trim();
   const errorEl = document.getElementById('login-error');
   
@@ -844,23 +845,11 @@ async function doLogin() {
     return;
   }
   
-  try {
-    const res = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password })
-    });
-    const data = await res.json();
-    
-    if (data.success) {
-      sessionStorage.setItem('autoflow_auth', 'true');
-      showApp();
-    } else {
-      errorEl.textContent = data.error || 'Invalid password';
-      errorEl.style.display = 'block';
-    }
-  } catch (e) {
-    errorEl.textContent = 'Server error - check connection';
+  if (password === ADMIN_PASSWORD) {
+    sessionStorage.setItem('autoflow_auth', 'true');
+    showApp();
+  } else {
+    errorEl.textContent = 'Invalid password';
     errorEl.style.display = 'block';
   }
 }
@@ -913,7 +902,6 @@ function renderStars(rating) {
   return html;
 }
 
-// Generate sample revenue data based on stats
 function generateRevenueData(mrr) {
   const months = [];
   const values = [];
@@ -924,13 +912,11 @@ function generateRevenueData(mrr) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthName = d.toLocaleDateString('en-US', { month: 'short' });
     months.push(monthName);
-    // Simulate growth curve ending at current MRR
     const growth = (6 - i) / 6;
     const randomFactor = 0.8 + Math.random() * 0.4;
     values.push(Math.round(baseMrr * growth * randomFactor));
   }
   
-  // Ensure last point matches current MRR
   values[values.length - 1] = baseMrr;
   
   return { months, values };
@@ -939,35 +925,28 @@ function generateRevenueData(mrr) {
 function updateRevenueChart(mrr) {
   const data = generateRevenueData(mrr);
   const maxVal = Math.max(...data.values, 1);
-  const minVal = Math.min(...data.values);
   
-  // Update Y axis labels
   document.getElementById('y-max').textContent = formatMoney(maxVal);
   document.getElementById('y-mid').textContent = formatMoney(Math.round(maxVal * 0.5));
   document.getElementById('y-min').textContent = '$0';
   
-  // Update X axis labels
   document.getElementById('x-start').textContent = data.months[0];
   document.getElementById('x-end').textContent = data.months[data.months.length - 1];
   
-  // Build SVG path
   const width = 300;
   const height = 200;
   const points = data.values.map((v, i) => {
     const x = (i / (data.values.length - 1)) * width;
-    const y = height - ((v / maxVal) * height * 0.9) - 10; // 10px padding at bottom
+    const y = height - ((v / maxVal) * height * 0.9) - 10;
     return { x, y };
   });
   
-  // Line path
   const lineD = points.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(' ');
   document.getElementById('chart-line-path').setAttribute('d', lineD);
   
-  // Area path (line + bottom corners)
   const areaD = lineD + ` L${width},${height} L0,${height} Z`;
   document.getElementById('chart-area-path').setAttribute('d', areaD);
   
-  // Update circles
   document.getElementById('pt1').setAttribute('cx', points[0].x);
   document.getElementById('pt1').setAttribute('cy', points[0].y);
   document.getElementById('pt2').setAttribute('cx', points[points.length - 1].x);
@@ -990,7 +969,6 @@ async function loadStats() {
     document.getElementById('prospect-bar').style.width = Math.min(100, ((stats.prospects || 0) / 100) * 100) + '%';
     document.getElementById('email-bar').style.width = Math.min(100, ((stats.emailsSent || 0) / 200) * 100) + '%';
     
-    // Update revenue chart
     updateRevenueChart(stats.mrr || 0);
   } catch (e) {
     console.error('Stats error:', e);
@@ -1010,7 +988,7 @@ async function loadProspects() {
       return;
     }
     
-    list.innerHTML = currentProspects.map((p, i) => `
+    list.innerHTML = currentProspects.map((p) => `
       <div class="table-row">
         <div>
           <div class="biz-name">${escapeHtml(p.name)}</div>
@@ -1165,7 +1143,6 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Real-time polling
 setInterval(() => {
   if (!isLoggedIn) return;
   const overviewVisible = document.getElementById('tab-overview').style.display !== 'none';
