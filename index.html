@@ -138,12 +138,14 @@ h2{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,36px);font-weig
 .form-group input:focus,.form-group textarea:focus{border-color:var(--navy);outline:none;}
 .form-group textarea{resize:vertical;min-height:100px;}
 
-/* FOOTER */
-footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+/* FOOTER — FIXED: block layout, no flex-wrap jumping */
+footer{border-top:1px solid var(--line);padding:36px 0;text-align:center;}
+.foot-top{display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto;padding:0 28px;}
+@media(max-width:640px){.foot-top{flex-direction:column;gap:8px;}}
 .foot-left{font-family:'Playfair Display',serif;font-size:16px;}
 .foot-right{font-size:12.5px;color:var(--text-faint);}
-.foot-contact{width:100%;text-align:center;margin-top:12px;font-size:13px;color:var(--text-mid);font-family:'JetBrains Mono',monospace;display:flex;flex-direction:column;gap:4px;align-items:center;}
-.foot-contact a{color:var(--navy-mid);}
+.foot-contact{margin-top:16px;font-size:13px;color:var(--text-mid);font-family:'JetBrains Mono',monospace;line-height:1.8;}
+.foot-contact a{color:var(--navy-mid);display:inline-block;}
 .foot-contact a:hover{color:var(--navy);text-decoration:underline;}
 </style>
 </head>
@@ -343,24 +345,24 @@ footer{border-top:1px solid var(--line);padding:36px 0;display:flex;justify-cont
   </div>
 </section>
 
+</div>
+
 <footer>
-  <div class="foot-left">Autoflow</div>
-  <div class="foot-right">© 2026 · Not affiliated with any review platform · Results vary by business</div>
+  <div class="foot-top">
+    <div class="foot-left">Autoflow</div>
+    <div class="foot-right">© 2026 · Not affiliated with any review platform · Results vary by business</div>
+  </div>
   <div class="foot-contact">
-    <a href="mailto:autoflowicu@gmail.com">autoflowicu@gmail.com</a>
+    <a href="mailto:autoflowicu@gmail.com">autoflowicu@gmail.com</a><br>
     <a href="tel:+14087594429">+1 408-759-4429</a>
   </div>
 </footer>
 
-</div>
-
 <script>
-// INDUSTRIES
 var industries = ['Dental Offices','Law Firms','Auto Dealerships','Restaurants','Medical Practices','Real Estate Agencies','Hotels & Motels','Barbershops & Salons','Veterinary Clinics','HVAC & Plumbing','Gyms & Fitness Studios','Optometrists','Chiropractors','Accounting Firms','Physical Therapy','Spas & MedSpas','Roofing Companies','Pest Control','Urgent Care Centers','Mortgage Brokers','Insurance Agencies','Home Inspectors','Car Washes','Landscaping Companies','Flooring & Tile'];
 var track = document.getElementById('indTrack');
 if (track) track.innerHTML = industries.map(function(i){ return '<div class="ind-item">'+i+'</div>'; }).join('');
 
-// CITIES
 var cities = ['Houston TX','New York NY','Los Angeles CA','Chicago IL','Phoenix AZ','Philadelphia PA','San Antonio TX','San Diego CA','Dallas TX','San Jose CA','Austin TX','Jacksonville FL','Fort Worth TX','Columbus OH','Charlotte NC','Indianapolis IN','San Francisco CA','Seattle WA','Denver CO','Nashville TN','Oklahoma City OK','El Paso TX','Las Vegas NV','Louisville KY','Memphis TN','Portland OR','Baltimore MD','Milwaukee WI','Albuquerque NM','Tucson AZ','Fresno CA','Sacramento CA','Mesa AZ','Kansas City MO','Atlanta GA','Omaha NE','Colorado Springs CO','Raleigh NC','Miami FL','Virginia Beach VA','Long Beach CA','Minneapolis MN','Tampa FL','New Orleans LA','Arlington TX','Bakersfield CA','Honolulu HI','Anaheim CA','Aurora CO','Santa Ana CA'];
 var grid = document.getElementById('citiesGrid');
 if (grid) grid.innerHTML = cities.map(function(c){ return '<div class="city-chip"><span class="cdot"></span>'+c+'</div>'; }).join('');
